@@ -1,0 +1,21 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+    <h1>CHARACTERS</h1>
+
+    {% for character in characters %}
+    
+        <div>
+            <a href="{% url 'character' character.id %}"> {{ character.name }} </a> 
+
+            <br>
+
+            <spam> {{ character.classe }} </spam>
+
+            <hr>
+        </div>
+
+    {% endfor %}
+
+{% endblock content %}
