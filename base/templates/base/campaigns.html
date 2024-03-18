@@ -3,5 +3,21 @@
 {% block content %}
 
     <h1>CAMPAIGNS</h1>
+    <a href="{% url 'create-campaign' %}">Add campaign</a>
+    <br>
+
+    <hr>
+
+    {% for campaign in campaigns %}
+    
+        <div>
+            <a href="{% url 'campaign' campaign.id %}"> {{ campaign.name }} </a> 
+
+            <p>Description</p>
+
+            <hr>
+        </div>
+
+    {% endfor %}
 
 {% endblock content %}
