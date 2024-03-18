@@ -2,8 +2,8 @@
 
 {% block content %}
 
-    <a href="">Add character</a>
     <h1>CHARACTERS</h1>
+    <a href="{% url 'create-character' %}">Add character</a>
 
     {% for character in characters %}
     
