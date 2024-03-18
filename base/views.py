@@ -18,3 +18,6 @@ def character(request, pk):
 
     context = {'character': character}
     return render(request, 'base/character.html', context)
+
+def createCharacter(request):
+    return render(request, 'base/character_form.html')
