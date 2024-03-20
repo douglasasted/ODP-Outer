@@ -30,6 +30,16 @@ def createCharacter(request):
     context = {'form': form}
     return render(request, 'base/character_form.html', context)
 
+def deleteCharacter(request, pk):
+    character = Character.objects.get(id=pk)
+
+    if request.method == 'POST':
+        character.delete()
+        return redirect('characters')
+
+    context = {'obj': character}
+    return render(request, 'base/delete.html', context)
+
 
 # Campaign: Creation & visualization
 def campaigns(request):
@@ -54,3 +64,13 @@ def createCampaign(request):
         
     context = {'form': form}
     return render(request, 'base/campaign_form.html', context)
+
+def deleteCampaign(request, pk):
+    campaign = Campaign.objects.get(id=pk)
+
+    if request.method == 'POST':
+        campaign.delete()
+        return redirect('campaigns')
+
+    context = {'obj': campaign}
+    return render(request, 'base/delete.html', context)

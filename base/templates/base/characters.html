@@ -12,9 +12,13 @@
         <div>
             <a href="{% url 'character' character.id %}"> {{ character.name }} </a> 
 
+            <!-- USER -->
+
             <br>
 
             <spam> {{ character.classe }} </spam>
+
+            <a href="{% url 'delete-character' character.id %}">Delete</a>
 
             <hr>
         </div>
