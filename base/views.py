@@ -2,22 +2,28 @@ from django.shortcuts import render, redirect
 from .models import Character, Campaign
 from .forms import CharacterForm, CampaignForm
 
+
 def about(request):
     return render(request, 'base/about.html')
 
 
+
+# ---------------------------
 # Character: Creation & visualization
+# ---------------------------
 def characters(request):
     _characters = Character.objects.all()
 
     context = {'characters': _characters}
     return render(request, 'base/characters.html', context)
 
+
 def character(request, pk):
     character = Character.objects.get(id=pk)
 
     context = {'character': character}
     return render(request, 'base/character.html', context)
+
 
 def createCharacter(request):
     form = CharacterForm()
@@ -30,6 +36,7 @@ def createCharacter(request):
     context = {'form': form}
     return render(request, 'base/character_form.html', context)
 
+
 def deleteCharacter(request, pk):
     character = Character.objects.get(id=pk)
 
@@ -41,18 +48,23 @@ def deleteCharacter(request, pk):
     return render(request, 'base/delete.html', context)
 
 
+
+# ---------------------------
 # Campaign: Creation & visualization
+# ---------------------------
 def campaigns(request):
     campaigns = Campaign.objects.all()
 
     context = {'campaigns': campaigns}
     return render(request, 'base/campaigns.html', context)
 
+
 def campaign(request, pk):
     campaign = Campaign.objects.get(id=pk)
 
     context = {'campaign': campaign}
     return render(request, 'base/campaign.html', context)
+
 
 def createCampaign(request):
     form = CampaignForm()
@@ -65,6 +77,7 @@ def createCampaign(request):
     context = {'form': form}
     return render(request, 'base/campaign_form.html', context)
 
+
 def deleteCampaign(request, pk):
     campaign = Campaign.objects.get(id=pk)
 
@@ -74,3 +87,17 @@ def deleteCampaign(request, pk):
 
     context = {'obj': campaign}
     return render(request, 'base/delete.html', context)
+
+
+def updateCampaign(request, pk):
+    campaign = Campaign.objects.get(id=pk)
+    form = CampaignForm(instance=campaign)
+
+    if request.method == 'POST':
+        form = CampaignForm(request.POST, instance=campaign)
+        if form.is_valid():
+            form.save()
+            return redirect('campaign', pk)
+        
+    context = {'form': form}
+    return render(request, 'base/campaign_form.html', context)

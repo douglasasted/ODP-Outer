@@ -2,27 +2,27 @@
 
 {% block content %}
 
-    <h1>CHARACTERS</h1>
-    <a href="{% url 'create-character' %}">Add character</a>
+<h1>CHARACTERS</h1>
+<a href="{% url 'create-character' %}">Add character</a>
 
-    <hr>
+<hr>
 
-    {% for character in characters %}
-    
-        <div>
-            <a href="{% url 'character' character.id %}"> {{ character.name }} </a> 
+{% for character in characters %}
 
-            <!-- USER -->
+    <div>
+        <a href="{% url 'character' character.id %}"> {{ character.name }} </a> 
 
-            <br>
+        <!-- USER -->
 
-            <spam> {{ character.classe }} </spam>
+        <br>
 
-            <a href="{% url 'delete-character' character.id %}">Delete</a>
+        <spam> {{ character.classe }} </spam>
 
-            <hr>
-        </div>
+        <a href="{% url 'delete-character' character.id %}">Delete</a>
 
-    {% endfor %}
+        <hr>
+    </div>
+
+{% endfor %}
 
 {% endblock content %}

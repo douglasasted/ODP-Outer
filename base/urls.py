@@ -12,5 +12,6 @@ urlpatterns = [
     path('campaigns/', views.campaigns, name='campaigns'),
     path('campaign/<str:pk>/', views.campaign, name='campaign'),
     path('create-campaign/', views.createCampaign, name='create-campaign'),
-    path('delete-campaign/<str:pk>/', views.deleteCampaign, name='delete-campaign')
+    path('delete-campaign/<str:pk>/', views.deleteCampaign, name='delete-campaign'),
+    path('update-campaign/<str:pk>/', views.updateCampaign, name='update-campaign')
 ]

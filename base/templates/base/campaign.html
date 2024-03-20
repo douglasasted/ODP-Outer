@@ -2,6 +2,50 @@
 
 {% block content %}
 
-    <h1>{{ campaign.name }}</h1>
+<style>
+    .campaign-container {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+    }
+</style>
+
+<h1>{{ campaign.name }}</h1>
+
+<div class="campaign-container">
+
+    <div>
+
+        <a href="{% url 'delete-campaign' campaign.id %}">Delete</a>
+        
+        <a href="{% url 'update-campaign' campaign.id %}">Edit</a>
+        
+        <p> {{ campaign.description }} </p>
+
+        <p>
+            <a> CHARACTER 1 </a>
+        </p>
+
+        <p>
+            <a> CHARACTER 2 </a>
+        </p>
+
+        <p>
+            <a> CHARACTER 3 </a>
+        </p>
+
+        <p>
+            <a> CHARACTER 4 </a>
+        </p>
+
+        <p>
+            <a> CHARACTER 5 </a>
+        </p>
+    </div>
+
+    <div>
+        <h2> CHAT </h2>
+    </div>
+
+</div>
 
 {% endblock content %}

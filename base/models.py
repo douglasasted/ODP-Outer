@@ -127,6 +127,7 @@ class Campaign(models.Model):
     # master = 
     # users = 
     name = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
 
     created = models.DateTimeField(auto_now_add=True)
 

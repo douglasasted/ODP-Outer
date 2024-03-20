@@ -2,14 +2,14 @@
 
 {% block content %}
 
-    <h1>Registrate Character</h1>
+<h1>Registrate Character</h1>
 
-    <form method="POST" action="">
-        {% csrf_token %}
+<form method="POST" action="">
+    {% csrf_token %}
 
-        {{form.as_p}}
+    {{form.as_p}}
 
-        <input type="SUBMIT" value="Create Character" />
-    </form>
+    <input type="SUBMIT" value="Create Character" />
+</form>
 
 {% endblock content %}
