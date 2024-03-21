@@ -1,0 +1,30 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<h1>CHARACTERS</h1>
+<a href="{% url 'create-character' %}">Add character</a>
+
+<hr>
+
+{% for character in characters %}
+
+
+{% if request.user == character.player %}
+
+<div>
+    <a href="{% url 'character' character.id %}"> {{ character.name }} </a>
+
+    <br>
+
+    <spam> {{ character.classe }} </spam>
+    <a href="{% url 'delete-character' character.id %}">Delete</a>
+
+    <hr>
+</div>
+
+{% endif %}
+
+{% endfor %}
+
+{% endblock content %}

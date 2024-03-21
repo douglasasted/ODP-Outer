@@ -1,7 +1,8 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Character(models.Model):
-    # player =   
+    player = models.ForeignKey(User, on_delete=models.CASCADE)  
     # campaign = 
     name = models.CharField(max_length=200)
     classe = models.CharField(max_length=200)
@@ -124,7 +125,7 @@ class Character(models.Model):
         return self.name
 
 class Campaign(models.Model):
-    # master = 
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)  
     # users = 
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)

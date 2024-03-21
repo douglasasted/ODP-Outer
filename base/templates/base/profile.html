@@ -1,0 +1,13 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<h1>
+    {{ request.user }}
+</h1>
+
+<a href="{% url 'logout' %}" class="navbar-element">
+    Logout
+</a>
+
+{% endblock content %}

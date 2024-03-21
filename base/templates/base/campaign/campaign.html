@@ -15,10 +15,14 @@
 
     <div>
 
+        {% if request.user == campaign.owner %}
+
         <a href="{% url 'delete-campaign' campaign.id %}">Delete</a>
         
         <a href="{% url 'update-campaign' campaign.id %}">Edit</a>
         
+        {% endif %}
+
         <p> {{ campaign.description }} </p>
 
         <p>

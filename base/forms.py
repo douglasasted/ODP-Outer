@@ -21,4 +21,6 @@ class CharacterForm(ModelForm):
 class CampaignForm(ModelForm):
     class Meta:
         model = Campaign
-        fields = '__all__'
+        fields = [
+            'name', 
+            'description']

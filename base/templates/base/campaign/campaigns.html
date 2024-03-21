@@ -3,7 +3,7 @@
 {% block content %}
 
 <h1>CAMPAIGNS</h1>
-<a href="{% url 'create-campaign' %}">Add campaign</a>
+<a href="{% url 'create-campaign' %}">New Campaign</a>
 <br>
 
 <hr>
@@ -12,6 +12,8 @@
 
     <div>
         <a href="{% url 'campaign' campaign.id %}"> {{ campaign.name }} </a> 
+
+        <p>@{{ campaign.owner }}</p>
 
         <p>Created on {{ campaign.created }}</p>
 
