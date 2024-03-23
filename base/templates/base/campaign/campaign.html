@@ -26,30 +26,90 @@
         <p> {{ campaign.description }} </p>
 
         <p>
-            <a> CHARACTER 1 </a>
+            @{{campaign.owner}}
         </p>
 
+        {% for participant in participants %}
+        
         <p>
-            <a> CHARACTER 2 </a>
+            @{{participant}}
         </p>
 
-        <p>
-            <a> CHARACTER 3 </a>
-        </p>
-
-        <p>
-            <a> CHARACTER 4 </a>
-        </p>
-
-        <p>
-            <a> CHARACTER 5 </a>
-        </p>
+        {% endfor %}
     </div>
 
     <div>
         <h2> CHAT </h2>
-    </div>
+        <hr>
 
+        <div id="display">
+        </div>
+
+        <div>
+            <form id="comment-form" method="POST" action="">
+                {% csrf_token %}
+                
+                <input type="text" name="body" id="body"/>
+            </form>
+        </div>
+    </div>
 </div>
+
+<script type="text/javascript">
+
+
+// Function for receiving the messages
+$(document).ready(function() 
+{
+    setInterval(function(){
+
+        $.ajax({
+            type: 'GET',
+            url: "/get-message/{{campaign}}/",
+            success: function(response)
+            {
+                $("#display").empty();
+                for (var key in response.messages)
+                {
+                    var message = response.messages[key];
+
+                    var temp="<small>@" + message.username + " | " + message.created + "</small><p>" + message.body + "</p>";
+                        
+                    $("#display").append(temp);
+                }
+            },
+            error: function(response) 
+            {
+                alert('An error occurred')
+            }
+        })
+
+    }, 1000);
+});
+
+
+// Function for sending the message
+$(document).on('submit', '#comment-form', function(e)
+{
+    e.preventDefault();
+
+    $.ajax({
+        type:'POST',
+        url:'/send-message/',
+        data:{
+            campaign:14,
+            body:$('#body').val(),
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) {
+            //alert(data)
+        }
+    });
+    
+    document.getElementById('body').value = ''
+});
+
+
+</script>
 
 {% endblock content %}

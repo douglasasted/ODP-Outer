@@ -4,8 +4,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Character, Campaign
+from .models import Character, Campaign, Message
 from .forms import CharacterForm, CampaignForm
+from django.http import HttpResponse, JsonResponse
 
 
 def loginUser(request):
@@ -66,6 +67,23 @@ def registerUser(request):
 def profile(request):
     return render(request, 'base/profile.html')
 
+
+def sendMessage(request):
+    campaign = Campaign.objects.get(id=request.POST['campaign'])
+    body = request.POST['body']
+
+    message = Message.objects.create(user=request.user, username=request.user.username, campaign=campaign, body=body)
+    message.save()
+
+    return HttpResponse('Message sent successfully')
+
+def getMessage(request, pk):
+    campaign = Campaign.objects.get(name=pk)
+
+    messages = Message.objects.filter(campaign=campaign.id)
+    
+    context = {'messages': list(messages.values()) }
+    return JsonResponse(context)
 
 def about(request):
     return render(request, 'base/about.html')
@@ -138,8 +156,10 @@ def campaigns(request):
 @login_required(login_url='login')
 def campaign(request, pk):
     campaign = Campaign.objects.get(id=pk)
+    campaign_messages = campaign.message_set.all().order_by('created')
+    participants = campaign.participants.all()
 
-    context = {'campaign': campaign}
+    context = {'campaign': campaign, 'campaign_messages': campaign_messages, 'participants': participants}
     return render(request, 'base/campaign/campaign.html', context)
 
 

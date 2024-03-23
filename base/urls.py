@@ -6,6 +6,10 @@ urlpatterns = [
     path('logout/', views.logoutUser, name='logout'),
     path('register/', views.registerUser, name='register'),
     path('profile/', views.profile, name='profile'),
+    
+    path('send-message/', views.sendMessage, name='send-message'),
+    path('get-message/<str:pk>/', views.getMessage, name='get-message'),
+
 
     path('', views.about, name='about'),
 

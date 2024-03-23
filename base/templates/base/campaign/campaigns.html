@@ -13,9 +13,13 @@
     <div>
         <a href="{% url 'campaign' campaign.id %}"> {{ campaign.name }} </a> 
 
-        <p>@{{ campaign.owner }}</p>
+        <br>
 
-        <p>Created on {{ campaign.created }}</p>
+        <small>@{{ campaign.owner }}</small> 
+        
+        <br>
+
+        <small>Registered in {{campaign.created.month}}/{{campaign.created.day}}/{{campaign.created.year}} </small>
 
         <hr>
     </div>
