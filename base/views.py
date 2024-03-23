@@ -105,7 +105,9 @@ def characters(request):
 def character(request, pk):
     character = Character.objects.get(id=pk)
 
-    context = {'character': character}
+    attributes = ["AGI", "INT", "VIG", "PRE", "FOR"]
+    defense = 10 + character.equipment_defense + character.other_defense
+    context = {'character': character, 'defense': defense, 'attributes': attributes}
     return render(request, 'base/character/character.html', context)
 
 

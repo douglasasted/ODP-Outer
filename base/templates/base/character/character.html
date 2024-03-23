@@ -1,18 +1,278 @@
 {% extends "main.html" %}
 
+{% load index %}
+
 {% block content %}
 
-<h1>{{ character.name }}</h1>
+<!-- Probably temporary styling -->
+<style>
+    .character-container 
+    {
+        display: grid;
+        grid-template-columns: 1fr 1fr 2fr;
+    }
 
-<p> Class : {{character.classe}} </p>
-<p> Origin : {{character.origin}} </p>
+    .skill-field 
+    {
+        width: 15%;
+    }
+</style>
 
-<br>
+<div class="character-container">
+    <div>
+        <h1>{{ character.name }}</h1>
+        <p>
+            <label>Class </label>
+            <input type="text" value="{{character.classe}}"/>
+        </p>
+        <p>
+            <label>Origin </label>
+            <input type="text" value="{{character.origin}}"/>
+        </p>
+        <br>
 
-<p> Agility : {{character.attribute_agility}} </p>
-<p> Strength : {{character.attribute_strength}} </p>
-<p> Intellect : {{character.attribute_intellect}} </p>
-<p> Vigor : {{character.attribute_vigor}} </p>
-<p> Presence : {{character.attribute_presence}} </p>
+
+        <h3>Attributes</h3>
+        <p> Agility : {{character.attribute_agility}} </p>
+        <p> Strength : {{character.attribute_strength}} </p>
+        <p> Intellect : {{character.attribute_intellect}} </p>
+        <p> Vigor : {{character.attribute_vigor}} </p>
+        <p> Presence : {{character.attribute_presence}} </p>
+        <br>
+
+
+        <p>
+            <label>EXP</label>
+            <input type="text" value="{{character.paranormal_exposition}}"/>
+        </p>
+        <p>
+            <label>PE / Turn</label>
+            <input type="text" value="{{character.pe_turn}}"/>
+        </p>
+        <p>
+            <label>Speed</label>
+            <input type="text" value="{{character.speed}}"/>
+        </p>
+        <br>
+
+        
+        <p>
+            <label>Health</label>
+            {{character.current_health}} / {{character.max_health}}
+        </p>
+        <p>
+            <label>Sanity</label>
+            {{character.current_sanity}} / {{character.max_sanity}}
+        </p>
+        <p>
+            <label>Effort</label>
+            {{character.current_effort}} / {{character.max_effort}}
+        </p>
+        <br>
+
+        
+        <b><p>Defense = {{defense}}</p></b>
+        <p>
+            <label>Equipment Defense</label>
+            <input type="text" value="{{character.equipment_defense}}"/>
+        </p>
+        <p>
+            <label>Other Defense</label>
+            <input type="text" value="{{character.other_defense}}"/>
+        </p>
+        <br>
+
+
+        <p>
+            <label>Block</label>
+            <input type="text" value="{{character.block}}"/>
+        </p>
+        <p>
+            <label>Dodge</label>
+            <input type="text" value="{{character.dodge}}"/>
+        </p>
+        <br>
+
+
+        <p>
+            <label>Protection</label>
+            <input type="text" value="{{character.protection}}"/>
+        </p>
+        <p>
+            <label>Resistance</label>
+            <input type="text" value="{{character.resistance}}"/>
+        </p>
+        <p>
+            <label>Proficiency</label>
+            <input type="text" value="{{character.proficiency}}"/>
+        </p>
+    </div>
+    <div>
+        <h3>Skills</h3>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+        <p>
+            <label style="font-size:14px">Acrobacy < {{ attributes|index:character.skill_acrobacy_attribute }} > </label>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy}}"/>
+            <input class="skill-field" type="text" value="{{character.skill_acrobacy_others}}"/>
+        </p>
+    </div>
+    <div>
+        <h3>Combat / Abilities / Rituals / Inventory / Description</h3>
+        <p>
+            <spam>Notes</spam><br>
+            <textarea></textarea>
+        </p>
+        <p>
+            <spam>Appearance</spam><br>
+            <textarea></textarea>
+        </p>
+        <p>
+            <spam>Personality</spam><br>
+            <textarea></textarea>
+        </p>
+        <p>
+            <spam>Background</spam><br>
+            <textarea></textarea>
+        </p>
+        <p>
+            <spam>Objective</spam><br>
+            <textarea></textarea>
+        </p>
+    </div>
+</div>
 
 {% endblock content %}
