@@ -17,6 +17,7 @@ urlpatterns = [
     path('character/<str:pk>/', views.character, name='character'),
     path('create-character/', views.createCharacter, name='create-character'),
     path('delete-character/<str:pk>/', views.deleteCharacter, name='delete-character'),
+    path('update-character/<str:pk>/', views.updateCharacter, name='update-character'),
 
     path('campaigns/', views.campaigns, name='campaigns'),
     path('campaign/<str:pk>/', views.campaign, name='campaign'),

@@ -7,6 +7,20 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import Character, Campaign, Message
 from .forms import CharacterForm, CampaignForm
 from django.http import HttpResponse, JsonResponse
+import math
+
+
+# General Information
+
+# Get all skills in a single array
+skills = []
+fields = Character._meta.get_fields()
+for field in fields:
+    if field.name[:5] == "skill":
+        skills.append(field.name)
+
+skill_count = math.floor(len(skills) / 3)
+
 
 
 def loginUser(request):
@@ -105,9 +119,7 @@ def characters(request):
 def character(request, pk):
     character = Character.objects.get(id=pk)
 
-    attributes = ["AGI", "INT", "VIG", "PRE", "FOR"]
-    defense = 10 + character.equipment_defense + character.other_defense
-    context = {'character': character, 'defense': defense, 'attributes': attributes}
+    context = {'character': character, 'skills': skills, 'skills_count': range(skill_count)}
     return render(request, 'base/character/character.html', context)
 
 
@@ -142,6 +154,58 @@ def deleteCharacter(request, pk):
     context = {'obj': character}
     return render(request, 'base/delete.html', context)
 
+
+@login_required(login_url='login')
+def updateCharacter(request, pk):
+    character = Character.objects.get(id=pk)
+
+    if request.user != character.player:
+        return
+
+    character.attribute_agility = request.POST['attribute_agility']
+    character.attribute_strength = request.POST['attribute_strength']
+    character.attribute_intellect = request.POST['attribute_intellect']
+    character.attribute_vigor = request.POST['attribute_vigor']
+    character.attribute_presence = request.POST['attribute_presence']
+
+    character.current_health = request.POST['current_health']
+    character.max_health = request.POST['max_health']
+    character.current_sanity = request.POST['current_sanity']
+    character.max_sanity = request.POST['max_sanity']
+    character.current_effort = request.POST['current_effort']
+    character.max_effort = request.POST['max_effort']
+
+    character.classe = request.POST['classe']
+    character.origin = request.POST['origin']
+    
+    character.paranormal_exposition = request.POST['paranormal_exposition']
+    character.pe_turn = request.POST['pe_turn']
+    character.speed = request.POST['speed']
+
+    character.equipment_defense = request.POST['equipment_defense']
+    character.other_defense = request.POST['other_defense']
+
+    character.block = request.POST['block']
+    character.dodge = request.POST['dodge']
+
+    character.protection = request.POST['protection']
+    character.resistance = request.POST['resistance']
+    character.proficiency = request.POST['proficiency']
+        
+    for skill in skills:
+        value = request.POST.get(skill, False)
+
+        setattr(character, skill, value)
+
+    character.notes = request.POST['notes']
+    character.appearance = request.POST['appearance']
+    character.personality = request.POST['personality']
+    character.background = request.POST['background']
+    character.objective = request.POST['objective']
+    
+    character.save()
+
+    return HttpResponse('Character updated successfully')
 
 
 # ---------------------------

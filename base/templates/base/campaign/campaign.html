@@ -62,32 +62,37 @@
 // Function for receiving the messages
 $(document).ready(function() 
 {
-    setInterval(function(){
+    getMessages();
 
-        $.ajax({
-            type: 'GET',
-            url: "/get-message/{{campaign}}/",
-            success: function(response)
-            {
-                $("#display").empty();
-                for (var key in response.messages)
-                {
-                    var message = response.messages[key];
-
-                    var temp="<small>@" + message.username + " | " + message.created + "</small><p>" + message.body + "</p>";
-                        
-                    $("#display").append(temp);
-                }
-            },
-            error: function(response) 
-            {
-                alert('An error occurred')
-            }
-        })
-
-    }, 1000);
+    setInterval(function()
+    {
+        getMessages();
+    }, 1000);    
 });
 
+function getMessages() 
+{
+    $.ajax({
+        type: 'GET',
+        url: "/get-message/{{campaign}}/",
+        success: function(response)
+        {
+            $("#display").empty();
+            for (var key in response.messages)
+            {
+                var message = response.messages[key];
+
+                var temp="<small>@" + message.username + " | " + message.created + "</small><p>" + message.body + "</p>";
+                    
+                $("#display").append(temp);
+            }
+        },
+        error: function(response) 
+        {
+            alert('An error occurred')
+        }
+    })
+}
 
 // Function for sending the message
 $(document).on('submit', '#comment-form', function(e)

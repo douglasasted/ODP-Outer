@@ -151,6 +151,32 @@ class Character(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def get_skill_name(self, skills, skill):
+        return skills[skill * 3]
+    
+    def get_skill_formatted_name(self, skills, skill):
+        return skills[skill * 3][6:].replace('_', ' ').capitalize()
+        
+    def get_selected_skill(self, value, property, skills, skill):
+        skill_attribute = getattr(self, skills[property + skill * 3])
+
+        if property == 0:
+            value *= 5
+
+        if (value == skill_attribute):
+            return "selected"
+        
+        return ""
+    
+    def get_selected_exposition(self, value):
+        if (value == self.paranormal_exposition):
+            return "selected"
+        
+        return ""
+    
+    def get_skill_value(self, skills, property, skill):
+        return getattr(self, skills[property + skill * 3])
 
 
 class Campaign(models.Model):
