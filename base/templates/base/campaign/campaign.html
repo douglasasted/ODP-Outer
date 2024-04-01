@@ -28,15 +28,21 @@
 
         {% endif %}
      
-        <a href="{% url 'share-campaign' campaign.id %}">Share</a>
+        <a href="{% url 'share-campaign' campaign.id %}">Share</a> / 
+     
+        <a href="{% url 'add-character-campaign' campaign.id %}">Add character</a>
 
         <p> {{ campaign.description }} </p>
 
         <p>
             @{{campaign.owner}}
         </p>
+        <br>
 
-        --------------------------------
+
+        <b>Players</b>
+
+        {% if participants.count > 1 %}
 
         {% for participant in participants %}
         
@@ -55,6 +61,44 @@
         {% endif %}
 
         {% endfor %}
+
+        {% else %}
+
+        <div>
+            No players in campaign
+        </div>
+        
+        {% endif %}
+        <br>
+
+        
+        <b>Characters</b>
+
+        {% if characters.count > 0 %}
+
+        {% for character in characters %}
+        
+        <div>
+            <a href="{% url 'character' character.id %}">{{character}}</a>
+
+            {% if request.user == campaign.owner or request.user == character.player %}
+
+            <button onclick="RemoveCharacter(this, {{ character.id }})"><small>Remove</small></button>
+
+            {% endif %}
+        </div>
+
+        {% endfor %}
+
+        {% else %}
+
+        <div>
+            No characters in campaign
+        </div>
+        
+        {% endif %}
+
+        <br>
     </div>
 
     <div>
@@ -145,11 +189,36 @@ function RemovePlayer(buttonCntrl, deletedPlayer)
 
     $.ajax({
         type:'POST',
-        url:'/remove-player-campaign/',
+        url:'{% url 'remove-player-campaign' %}',
         data:
         {
             campaign:{{ campaign.id }},
             player:deletedPlayer,
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) 
+        {
+            //console.log(data)
+            if (buttonCntrl == null)
+                window.location.href = "{% url 'campaigns' %}";
+        }
+    });
+}
+
+
+// Function for removing a player from the campaign
+function RemoveCharacter(buttonCntrl, deletedCharacter)
+{
+    if (buttonCntrl != null)
+        buttonCntrl.parentElement.remove();
+
+    $.ajax({
+        type:'POST',
+        url:'{% url 'remove-character-campaign' %}',
+        data:
+        {
+            campaign:{{ campaign.id }},
+            character:deletedCharacter,
             csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
         },
         success: function(data) 

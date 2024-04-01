@@ -110,9 +110,9 @@ def about(request):
 # ---------------------------
 @login_required(login_url='login')
 def characters(request):
-    _characters = Character.objects.all()
+    characters = Character.objects.filter(player=request.user)
 
-    context = {'characters': _characters}
+    context = {'characters': characters}
     return render(request, 'base/character/characters.html', context)
 
 
@@ -225,11 +225,12 @@ def campaign(request, pk):
     campaign = Campaign.objects.get(id=pk)
     campaign_messages = campaign.message_set.all().order_by('created')
     participants = campaign.participants.all()
+    characters = campaign.characters.all()
 
     if participants.contains(request.user) == False:
         return HttpResponse("You don't have the permissions to view this campaign")
 
-    context = {'campaign': campaign, 'campaign_messages': campaign_messages, 'participants': participants}
+    context = {'campaign': campaign, 'campaign_messages': campaign_messages, 'participants': participants, 'characters': characters}
     return render(request, 'base/campaign/campaign.html', context)
 
 
@@ -321,3 +322,32 @@ def removePlayerCampaign(request):
         return HttpResponse('Player removed successfully')
     
     return HttpResponse('Player NOT removed successfully')
+
+
+@login_required(login_url='login')
+def addCharacterCampaign(request, pk):
+    campaign = Campaign.objects.get(id=pk)
+    characters = Character.objects.filter(player=request.user)
+
+    if request.method == "POST":
+        character = Character.objects.get(id=request.POST['character'])
+        
+        campaign.characters.add(character)
+        campaign.save()
+        return redirect('campaign', pk=campaign.id)
+
+    context = {'campaign': campaign, 'characters': characters}
+    return render(request, 'base/campaign/campaign_add_character.html', context)
+
+
+@login_required(login_url='login')
+def removeCharacterCampaign(request):
+    campaign = Campaign.objects.get(id=request.POST['campaign'])
+    character = Character.objects.get(id=request.POST['character'])
+
+    if request.user == campaign.owner or request.user == character.player:
+        campaign.characters.remove(request.POST['character'])
+        campaign.save()
+        return HttpResponse('Character removed successfully')
+    
+    return HttpResponse('Character NOT removed successfully')

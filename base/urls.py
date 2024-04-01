@@ -14,17 +14,19 @@ urlpatterns = [
     path('', views.about, name='about'),
 
     path('characters/', views.characters, name='characters'),
-    path('character/<str:pk>/', views.character, name='character'),
     path('create-character/', views.createCharacter, name='create-character'),
     path('delete-character/<str:pk>/', views.deleteCharacter, name='delete-character'),
-    path('update-character/<str:pk>/', views.updateCharacter, name='update-character'),
+    path('character/<str:pk>/', views.character, name='character'),
+    path('character/update/<str:pk>/', views.updateCharacter, name='update-character'),
 
     path('campaigns/', views.campaigns, name='campaigns'),
-    path('campaign/<str:pk>/', views.campaign, name='campaign'),
     path('create-campaign/', views.createCampaign, name='create-campaign'),
     path('delete-campaign/<str:pk>/', views.deleteCampaign, name='delete-campaign'),
-    path('update-campaign/<str:pk>/', views.updateCampaign, name='update-campaign'),
-    path('share-campaign/<str:pk>/', views.shareCampaign, name='share-campaign'),
-    path('enter-campaign/<str:pk>/', views.enterCampaign, name='enter-campaign'),
-    path('remove-player-campaign/', views.removePlayerCampaign, name='remove-player-campaign')
+    path('campaign/<str:pk>/', views.campaign, name='campaign'),
+    path('campaign-update/<str:pk>/', views.updateCampaign, name='update-campaign'),
+    path('campaign-share/<str:pk>/', views.shareCampaign, name='share-campaign'),
+    path('campaign-enter/<str:pk>/', views.enterCampaign, name='enter-campaign'),
+    path('campaign-remove-player/', views.removePlayerCampaign, name='remove-player-campaign'),
+    path('campaign-add-character/<str:pk>/', views.addCharacterCampaign, name='add-character-campaign'),
+    path('campaign-remove-character/', views.removeCharacterCampaign, name='remove-character-campaign')
 ]

@@ -9,9 +9,6 @@
 
 {% for character in characters %}
 
-
-{% if request.user == character.player %}
-
 <div>
     <a href="{% url 'character' character.id %}"> {{ character.name }} </a>
 
@@ -22,8 +19,6 @@
 
     <hr>
 </div>
-
-{% endif %}
 
 {% endfor %}
 

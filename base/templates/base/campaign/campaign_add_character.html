@@ -1,0 +1,27 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<h1>{{ campaign.name }}</h1>
+
+{% for character in characters %}
+
+<form method="POST">
+    {{ character.name }}
+
+    {% csrf_token %}
+
+    <br>
+
+    <input type="hidden" name="character" value="{{ character.id }}" />
+    <spam> {{ character.classe }} / {{ character.paranormal_exposition }}% </spam>
+    <br>
+    <!--CHECK IF CHARACTER IS ALREADY ON THE CAMPAIGN-->
+    <button type="submit">Add</button>
+
+    <hr>
+</form>
+
+{% endfor %}
+
+{% endblock content %}

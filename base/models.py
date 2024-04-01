@@ -182,6 +182,7 @@ class Character(models.Model):
 class Campaign(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)  
     participants = models.ManyToManyField(User, related_name='participants', blank=True)
+    characters = models.ManyToManyField(Character, related_name='characters', blank=True)
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
 

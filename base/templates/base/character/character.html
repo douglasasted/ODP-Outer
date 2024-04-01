@@ -4,6 +4,8 @@
 
 {% block content %}
 
+{% if request.user == character.player or request.user.name == campaign.owner %}
+
 <!-- Probably temporary styling -->
 <style>
     .character-container 
@@ -269,6 +271,12 @@ function updateCharacter()
         }
     });
 }
+
+{% else %}
+
+You dont have permission to visualize this character
+
+{% endif %}
 
 </script>
 
