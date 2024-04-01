@@ -1,0 +1,17 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<h1>{{ campaign.name }}</h1>
+<p>
+    Would you like to enter this campaign?
+</p>
+<form method="POST">
+    {% csrf_token %}
+
+    <button type="submit" href="#">
+        Yes
+    </button>
+</form>
+
+{% endblock content %}

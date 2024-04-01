@@ -192,7 +192,7 @@ class Campaign(models.Model):
 
 
 class Message(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     username = models.TextField()
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     body = models.TextField()

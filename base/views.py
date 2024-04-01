@@ -87,6 +87,7 @@ def sendMessage(request):
     body = request.POST['body']
 
     message = Message.objects.create(user=request.user, username=request.user.username, campaign=campaign, body=body)
+    print(message.campaign)
     message.save()
 
     return HttpResponse('Message sent successfully')
@@ -213,7 +214,7 @@ def updateCharacter(request, pk):
 # ---------------------------
 @login_required(login_url='login')
 def campaigns(request):
-    campaigns = Campaign.objects.all()
+    campaigns = Campaign.objects.filter(participants=request.user)
 
     context = {'campaigns': campaigns}
     return render(request, 'base/campaign/campaigns.html', context)
@@ -224,6 +225,9 @@ def campaign(request, pk):
     campaign = Campaign.objects.get(id=pk)
     campaign_messages = campaign.message_set.all().order_by('created')
     participants = campaign.participants.all()
+
+    if participants.contains(request.user) == False:
+        return HttpResponse("You don't have the permissions to view this campaign")
 
     context = {'campaign': campaign, 'campaign_messages': campaign_messages, 'participants': participants}
     return render(request, 'base/campaign/campaign.html', context)
@@ -239,6 +243,9 @@ def createCampaign(request):
             final_form = form.save(commit=False)
 
             final_form.owner = request.user
+            final_form.save()
+
+            final_form.participants.add(request.user)
             final_form.save()
 
             return redirect('campaigns')
@@ -278,3 +285,39 @@ def updateCampaign(request, pk):
         
     context = {'form': form}
     return render(request, 'base/campaign/campaign_form.html', context)
+
+
+@login_required(login_url='login')
+def shareCampaign(request, pk):
+    campaign = Campaign.objects.get(id=pk)
+
+    context = {'campaign': campaign}
+    return render(request, 'base/campaign/campaign_share.html', context)
+
+
+@login_required(login_url='login')
+def enterCampaign(request, pk):
+    campaign = Campaign.objects.get(id=pk)
+
+    if request.method == "POST":
+        campaign.participants.add(request.user)
+        campaign.save()
+        return redirect('campaign', pk=campaign.id)
+
+    if campaign.participants.contains(request.user):
+        return redirect('campaign', pk=campaign.id)
+
+    context = {'campaign': campaign}
+    return render(request, 'base/campaign/campaign_enter.html', context)
+
+
+@login_required(login_url='login')
+def removePlayerCampaign(request):
+    campaign = Campaign.objects.get(id=request.POST['campaign'])
+
+    if request.user.id == campaign.owner.id or request.user.id == int(request.POST['player']):
+        campaign.participants.remove(request.POST['player'])
+        campaign.save()
+        return HttpResponse('Player removed successfully')
+    
+    return HttpResponse('Player NOT removed successfully')

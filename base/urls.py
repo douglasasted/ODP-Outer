@@ -23,5 +23,8 @@ urlpatterns = [
     path('campaign/<str:pk>/', views.campaign, name='campaign'),
     path('create-campaign/', views.createCampaign, name='create-campaign'),
     path('delete-campaign/<str:pk>/', views.deleteCampaign, name='delete-campaign'),
-    path('update-campaign/<str:pk>/', views.updateCampaign, name='update-campaign')
+    path('update-campaign/<str:pk>/', views.updateCampaign, name='update-campaign'),
+    path('share-campaign/<str:pk>/', views.shareCampaign, name='share-campaign'),
+    path('enter-campaign/<str:pk>/', views.enterCampaign, name='enter-campaign'),
+    path('remove-player-campaign/', views.removePlayerCampaign, name='remove-player-campaign')
 ]

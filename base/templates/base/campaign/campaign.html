@@ -18,11 +18,17 @@
 
         {% if request.user == campaign.owner %}
 
-        <a href="{% url 'delete-campaign' campaign.id %}">Delete</a>
+        <a href="{% url 'delete-campaign' campaign.id %}">Delete</a> /
         
-        <a href="{% url 'update-campaign' campaign.id %}">Edit</a>
+        <a href="{% url 'update-campaign' campaign.id %}">Edit</a> /
         
+        {% else %}
+
+        <a href="#" onclick="RemovePlayer(null, {{ user.id }})"> Leave</a> /
+
         {% endif %}
+     
+        <a href="{% url 'share-campaign' campaign.id %}">Share</a>
 
         <p> {{ campaign.description }} </p>
 
@@ -30,11 +36,23 @@
             @{{campaign.owner}}
         </p>
 
+        --------------------------------
+
         {% for participant in participants %}
         
-        <p>
+        {% if participant != campaign.owner %}
+        
+        <div>
             @{{participant}}
-        </p>
+
+            {% if request.user == campaign.owner %}
+
+            <button onclick="RemovePlayer(this, {{ participant.id }})"><small>Remove</small></button>
+
+            {% endif %}
+        </div>
+
+        {% endif %}
 
         {% endfor %}
     </div>
@@ -70,13 +88,14 @@ $(document).ready(function()
     }, 1000);    
 });
 
+
 function getMessages() 
 {
     $.ajax({
         type: 'GET',
         url: "/get-message/{{campaign}}/",
         success: function(response)
-        {
+        {   
             $("#display").empty();
             for (var key in response.messages)
             {
@@ -94,6 +113,7 @@ function getMessages()
     })
 }
 
+
 // Function for sending the message
 $(document).on('submit', '#comment-form', function(e)
 {
@@ -102,8 +122,9 @@ $(document).on('submit', '#comment-form', function(e)
     $.ajax({
         type:'POST',
         url:'/send-message/',
-        data:{
-            campaign:14,
+        data:
+        {
+            campaign:{{ campaign.id }},
             body:$('#body').val(),
             csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
         },
@@ -114,6 +135,31 @@ $(document).on('submit', '#comment-form', function(e)
     
     document.getElementById('body').value = ''
 });
+
+
+// Function for removing a player from the campaign
+function RemovePlayer(buttonCntrl, deletedPlayer)
+{
+    if (buttonCntrl != null)
+        buttonCntrl.parentElement.remove();
+
+    $.ajax({
+        type:'POST',
+        url:'/remove-player-campaign/',
+        data:
+        {
+            campaign:{{ campaign.id }},
+            player:deletedPlayer,
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) 
+        {
+            //console.log(data)
+            if (buttonCntrl == null)
+                window.location.href = "{% url 'campaigns' %}";
+        }
+    });
+}
 
 
 </script>
