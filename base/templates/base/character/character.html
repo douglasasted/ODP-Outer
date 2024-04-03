@@ -4,7 +4,7 @@
 
 {% block content %}
 
-{% if request.user == character.player or request.user.name == campaign.owner %}
+{% if request.user == character.player or request.user == campaign.owner %}
 
 <!-- Probably temporary styling -->
 <style>
@@ -210,29 +210,111 @@
 
     </div>
 
-    <!-- Description -->
+    <!-- Right Tab -->
     <div>
-        <h3>Combat / Abilities / Rituals / Inventory / Description</h3>
-        <p>
-            <spam>Notes</spam><br>
-            <textarea id="notes" onkeyup="updateCharacter()">{{character.notes}}</textarea>
-        </p>
-        <p>
-            <spam>Appearance</spam><br>
-            <textarea id="appearance" onkeyup="updateCharacter()">{{character.appearance}}</textarea>
-        </p>
-        <p>
-            <spam>Personality</spam><br>
-            <textarea id="personality" onkeyup="updateCharacter()">{{character.personality}}</textarea>
-        </p>
-        <p>
-            <spam>Background</spam><br>
-            <textarea id="background" onkeyup="updateCharacter()">{{character.background}}</textarea>
-        </p>
-        <p>
-            <spam>Objective</spam><br>
-            <textarea id="objective" onkeyup="updateCharacter()">{{character.objective}}</textarea>
-        </p>
+        <button class="tab-link" onclick="openPage('combat-tab', this)">Combat</button> 
+        <button id="default-open" class="tab-link" onclick="openPage('abilities-tab', this)"> Abilities </button> 
+        <button class="tab-link" onclick="openPage('rituals-tab', this)"> Rituals </button> 
+        <button class="tab-link" onclick="openPage('inventory-tab', this)"> Inventory </button> 
+        <button class="tab-link" onclick="openPage('description-tab', this)"> Description </button>
+
+        <!-- Combat -->
+        <div id="combat-tab" class="tab-content">
+            <h3>
+                Combat
+            </h3>
+        </div>
+        <!-- Abilities -->
+        <div id="abilities-tab" class="tab-content">
+            
+            <dialog id="new-ability-modal">
+                <h3> New Ability </h3>
+                <p>
+                    <label>Name</label>
+                    <input id="new-ability-name" type="text"/>
+                </p>
+                <p>
+                    <label>Description</label>
+                    <textarea id="new-ability-description"></textarea>
+                </p>
+                <button onclick="addNewAbility(this.parentElement.parentElement)"> Add ability </button>
+                <button onclick="newAbilityModal.close()"> Cancel </button>
+            </dialog>
+            
+            <dialog id="update-ability-modal">
+                <h3> Edit Ability </h3>
+                <input id="update-ability-id" type="hidden"/>
+                <p>
+                    <label>Name</label>
+                    <input id="update-ability-name" type="text"/>
+                </p>
+                <p>
+                    <label>Description</label>
+                    <textarea id="update-ability-description"></textarea>
+                </p>
+                <button onclick="updateAbility()"> Edit </button>
+                <button onclick="updateAbilityModal.close()"> Cancel </button>
+            </dialog>
+
+            <h3> Abilities </h3>
+            <button onclick="newAbilityModal.showModal()"> New Ability </button>
+            
+            <br>
+            <br>
+            
+            <hr>
+
+            {% for ability in abilities %}
+            
+            <div>
+                <b id="ability-{{ ability.id }}-name">{{ability.name}}</b>
+                <p id="ability-{{ ability.id }}-description">{{ability.description}}</p>
+                <button onclick="deleteAbility('{{ ability.id }}', this)">Delete</button>
+                /
+                <button onclick="openUpdateModal('{{ ability.id }}')">Edit</button>
+                <hr>
+            </div>
+
+            {% endfor %}
+        </div>
+        <!-- Rituals -->
+        <div id="rituals-tab" class="tab-content">
+            <h3>
+                Rituals
+            </h3>
+        </div>
+        <!-- Inventory -->
+        <div id="inventory-tab" class="tab-content">
+            <h3>
+                Inventory
+            </h3>
+        </div>
+        <!-- Description -->
+        <div id="description-tab" class="tab-content">
+            <h3>
+                Description
+            </h3>
+            <p>
+                <spam>Notes</spam><br>
+                <textarea id="notes" onkeyup="updateCharacter()">{{character.notes}}</textarea>
+            </p>
+            <p>
+                <spam>Appearance</spam><br>
+                <textarea id="appearance" onkeyup="updateCharacter()">{{character.appearance}}</textarea>
+            </p>
+            <p>
+                <spam>Personality</spam><br>
+                <textarea id="personality" onkeyup="updateCharacter()">{{character.personality}}</textarea>
+            </p>
+            <p>
+                <spam>Background</spam><br>
+                <textarea id="background" onkeyup="updateCharacter()">{{character.background}}</textarea>
+            </p>
+            <p>
+                <spam>Objective</spam><br>
+                <textarea id="objective" onkeyup="updateCharacter()">{{character.objective}}</textarea>
+            </p>
+        </div>
     </div>
     <div>
         {% if campaign != None %}
@@ -246,6 +328,130 @@
 <script>
 
 $(document).ready(updateCharacter());
+
+//-----------------------------
+// Page setup
+//-----------------------------
+function openPage(pageName, elmnt)
+{
+    // Hide all elements with class="tabcontent" by default */
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tab-content");
+    for (i = 0; i < tabcontent.length; i++)
+        tabcontent[i].style.display = "none";
+
+    // Remove the background color of all tablinks/buttons
+    tablinks = document.getElementsByClassName("tab-link");
+    for (i = 0; i < tablinks.length; i++) 
+        tablinks[i].style.backgroundColor = "";
+
+    // Show the specific tab content
+    document.getElementById(pageName).style.display = "block";
+}
+
+document.getElementById("default-open").click();
+
+const newAbilityModal = document.getElementById('new-ability-modal');
+const updateAbilityModal = document.getElementById('update-ability-modal');
+
+function addNewAbility(abilitiesElmnt)
+{
+    //console.log("Adding new ability...");
+    
+    var abilityName = $('#new-ability-name').val();
+    var abilityDescription = $('#new-ability-description').val();
+
+    $.ajax({
+        type:'POST',
+        url:'{% url 'add-ability' %}',
+        data:
+        {
+            character: {{ character.id }},
+            name: abilityName,
+            description: abilityDescription,
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) 
+        {
+            //console.log(data)
+            console.log(abilitiesElmnt);
+            if (data != -1)
+                abilitiesElmnt.innerHTML += "<div><b id=\"ability-" + data + "-name\"> " + abilityName + "</b><p id=\"ability-" + data + "-name\">" + abilityDescription + "</p><button onclick=\"deleteAbility('" + data + "', this)\">Delete</button> / <button onclick=\"openEditModal('" + data + "')\">Edit</button><hr></div>"
+        }
+    });
+
+    newAbilityModal.close();
+}
+
+function deleteAbility(ability, abilityElmnt)
+{
+    //console.log("Deleting ability...");
+    
+    $.ajax({
+        type:'POST',
+        url:'{% url 'delete-ability' %}',
+        data:
+        {
+            character: {{ character.id }},
+            ability: ability,
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) 
+        {
+            //console.log(data)
+            if (data != -1)
+                abilityElmnt.parentElement.remove();
+        }
+    });
+}
+
+function openUpdateModal(ability)
+{
+    updateAbilityModal.showModal();
+
+    document.getElementById('update-ability-id').value = ability;
+    document.getElementById('update-ability-name').value = document.getElementById('ability-' + ability + '-name').innerHTML;
+    document.getElementById('update-ability-description').innerHTML = document.getElementById('ability-' + ability + '-description').innerHTML;
+}
+
+function updateAbility(ability)
+{
+    //console.log("Deleting ability...");
+    
+    var ability = $('#update-ability-id').val();
+    var name = $('#update-ability-name').val();
+    var description = $('#update-ability-description').val();
+
+    $.ajax({
+        type:'POST',
+        url:'{% url 'update-ability' %}',
+        data:
+        {
+            character: {{ character.id }},
+            ability: ability,
+            name: name,
+            description: description,
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) 
+        {
+            //console.log(data)
+
+            // Update on page html
+            if (data != -1)
+            {
+                document.getElementById('ability-' + ability + '-name').innerHTML = name;
+                document.getElementById('ability-' + ability + '-description').innerHTML = description;
+            }
+        }
+    });
+
+    updateAbilityModal.close();
+}
+
+//-----------------------------
+// Dice rolls
+//-----------------------------
 
 // Popup for dice rolls
 function showDicePopup(text)
@@ -304,19 +510,24 @@ function rollSkill(skill)
     
 
     var attribute = attributes[document.getElementById(skill + "_attribute").value];
-    var skillValue = skillValues[document.getElementById(skill).value];
+    var skillTrainingValue = skillValues[document.getElementById(skill).value];
+    var skillOthersValue = document.getElementById(skill + "_others").value;
 
     var rolls = rollAttributeDice(attribute);
 
-    var totalRoll = parseInt(rolls[0]) + skillValue;
+    var totalRoll = parseInt(rolls[0]) + skillTrainingValue + parseInt(skillOthersValue);
 
 
-    var rollMsg = skill[6].toUpperCase() + skill.substring(7).replace("_", ' ') + " [" + totalRoll + "] = " + rolls[0] + " + " + skillValue + " (" + rolls + ")";
+    var rollMsg = skill[6].toUpperCase() + skill.substring(7).replace("_", ' ') + " [" + totalRoll + "] = " + rolls[0] + " + " + skillTrainingValue + " + " + skillOthersValue + " + (" + rolls + ")";
 
 
     showDicePopup(rollMsg);
     sendMessage(1, rollMsg);
 }
+
+//-----------------------------
+// Character Sheet Update
+//-----------------------------
 
 function updateCharacter() 
 {
@@ -364,7 +575,7 @@ function updateCharacter()
             {% call_method character 'get_skill_name' skills skill %}_others:$('#{% call_method character 'get_skill_name' skills skill %}_others').val(),
             {% call_method character 'get_skill_name' skills skill %}_attribute:$('#{% call_method character 'get_skill_name' skills skill %}_attribute').val(),
 
-            {% endfor%}
+            {% endfor %}
 
             notes:$('#notes').val(),
             appearance:$('#appearance').val(),
@@ -375,7 +586,7 @@ function updateCharacter()
         },
         success: function(data) 
         {
-            //console.log(data)
+            console.log(data)
         }
     });
 }

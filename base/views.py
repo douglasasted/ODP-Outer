@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Character, Campaign, Message
+from .models import Character, Campaign, Message, Ability, Ritual
 from .forms import CharacterForm, CampaignForm
 from django.http import HttpResponse, JsonResponse
 import math
@@ -119,12 +119,11 @@ def characters(request):
 @login_required(login_url='login')
 def character(request, pk):
     character = Character.objects.get(id=pk)
-    try:
-        campaign = Campaign.objects.get(characters=character)
-    except:
-        campaign = None
+    campaign = get_campaign(character)
 
-    context = {'character': character, 'campaign': campaign, 'skills': skills, 'skills_count': range(skill_count)}
+    abilities = Ability.objects.filter(character=character)
+
+    context = {'character': character, 'campaign': campaign, 'skills': skills, 'skills_count': range(skill_count), 'abilities':abilities}
     return render(request, 'base/character/character.html', context)
 
 
@@ -163,9 +162,10 @@ def deleteCharacter(request, pk):
 @login_required(login_url='login')
 def updateCharacter(request, pk):
     character = Character.objects.get(id=pk)
+    campaign = get_campaign(character)
 
-    if request.user != character.player:
-        return
+    if (request.user == character.player or (campaign != None and request.user == campaign.owner)) == False:
+        return HttpResponse("User doesnt have permissions for this action")
 
     character.attribute_agility = request.POST['attribute_agility']
     character.attribute_strength = request.POST['attribute_strength']
@@ -211,6 +211,51 @@ def updateCharacter(request, pk):
     character.save()
 
     return HttpResponse('Character updated successfully')
+
+
+@login_required(login_url='login')
+def addAbility(request):
+    character = Character.objects.get(id=request.POST['character'])
+    campaign = get_campaign(character)
+
+    if (request.user == character.player or (campaign != None and request.user == campaign.owner)) == False:
+        return HttpResponse(-1)
+
+    ability = Ability.objects.create(character=character, name=request.POST['name'], description=request.POST['description'])
+    ability.save()
+
+    return HttpResponse(ability.id)
+
+
+@login_required(login_url='login')
+def deleteAbility(request):
+    character = Character.objects.get(id=request.POST['character'])
+    campaign = get_campaign(character)
+
+    if (request.user == character.player or (campaign != None and request.user == campaign.owner)) == False:
+        return HttpResponse(-1)
+
+    ability = Ability.objects.get(id=request.POST['ability'])
+    ability.delete()
+
+    return HttpResponse(0)
+
+
+@login_required(login_url='login')
+def updateAbility(request):
+    character = Character.objects.get(id=request.POST['character'])
+    campaign = get_campaign(character)
+
+    if (request.user == character.player or (campaign != None and request.user == campaign.owner)) == False:
+        return HttpResponse(-1)
+
+    ability = Ability.objects.get(id=request.POST['ability'])
+
+    ability.name = request.POST['name']
+    ability.description = request.POST['description']
+    ability.save()
+
+    return HttpResponse(0)
 
 
 # ---------------------------
@@ -355,3 +400,14 @@ def removeCharacterCampaign(request):
         return HttpResponse('Character removed successfully')
     
     return HttpResponse('Character NOT removed successfully')
+
+
+
+# ---------------------------
+# Utility
+# ---------------------------
+def get_campaign(character):
+    try:
+        return Campaign.objects.get(characters=character)
+    except:
+        return None

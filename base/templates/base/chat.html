@@ -68,7 +68,7 @@ function sendMessage(type, body)
 {
     $.ajax({
         type:'POST',
-        url:'/send-message/',
+        url:'{% url 'send-message' %}',
         data:
         {
             campaign:{{ campaign.id }},

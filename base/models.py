@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 
 class Character(models.Model):
     player = models.ForeignKey(User, on_delete=models.CASCADE)  
-    # campaign = 
     name = models.CharField(max_length=200)
     classe = models.CharField(max_length=200)
     origin = models.CharField(max_length=200)
@@ -40,11 +39,6 @@ class Character(models.Model):
     personality = models.TextField(null=True, blank=True)
     background = models.TextField(null=True, blank=True)
     objective = models.TextField(null=True, blank=True)
-
-    #attacks
-    #abilities
-    #inventory
-    #rituals
 
     prestige = models.IntegerField(default=0)
     patent = models.CharField(null=True, blank=True, max_length=200)
@@ -204,3 +198,90 @@ class Message(models.Model):
 
     def __str__(self):
         return self.body[0:50]
+    
+
+class Ability(models.Model):
+    character = models.ForeignKey(Character, on_delete=models.CASCADE)
+
+    name = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+    
+    def __str__(self):
+        return self.name
+    
+
+class Ritual(models.Model):
+    character = models.ForeignKey(Character, on_delete=models.CASCADE)
+    
+    name = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+    
+    element = models.IntegerField(default=0)
+    circle = models.IntegerField(default=1)
+    
+    execution_time = models.TextField()
+    range = models.TextField()
+    area = models.TextField(null=True, blank=True)
+    duration = models.TextField(null=True, blank=True)
+    effect = models.TextField(null=True, blank=True)
+    resistance = models.TextField(null=True, blank=True)
+    
+    dices = models.TextField(null=True, blank=True)
+    risen_dices = models.TextField(null=True, blank=True)
+    true_dices = models.TextField(null=True, blank=True)
+
+
+    character = models.ForeignKey(Character, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return self.name
+    
+
+class Item(models.Model):
+    character = models.ForeignKey(Character, on_delete=models.CASCADE)
+
+    name = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+
+    category = models.IntegerField(default=0)
+    spaces = models.IntegerField(default=0)
+    
+    class Meta:
+        abstract=True
+
+
+class GeneralItem(Item):
+    tag = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.name
+
+
+class WeaponItem(Item):
+    proficiency = models.CharField(max_length=200)
+    weapon_type = models.CharField(max_length=200)
+    grip_type = models.CharField(max_length=200)
+
+    damage = models.CharField(max_length=200, null=True, blank=True)
+    secondary_damage = models.CharField(max_length=200, null=True, blank=True)
+    critical = models.IntegerField(default=20)
+    multiplier = models.IntegerField(default=2)
+    damage_type = models.CharField(max_length=200)
+    range = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
+
+
+class ProtectionItem(Item):
+    defense = models.IntegerField(default=1)
+    
+    def __str__(self):
+        return self.name
+
+
+class CursedItem(Item):
+    element = models.IntegerField(default=0)
+    
+    def __str__(self):
+        return self.name

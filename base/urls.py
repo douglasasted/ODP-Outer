@@ -17,7 +17,17 @@ urlpatterns = [
     path('create-character/', views.createCharacter, name='create-character'),
     path('delete-character/<str:pk>/', views.deleteCharacter, name='delete-character'),
     path('character/<str:pk>/', views.character, name='character'),
-    path('character/update/<str:pk>/', views.updateCharacter, name='update-character'),
+    path('character-update/<str:pk>/', views.updateCharacter, name='update-character'),
+    
+    path('add-ability/', views.addAbility, name='add-ability'),
+    path('delete-ability/', views.deleteAbility, name='delete-ability'),
+    path('update-ability/', views.updateAbility, name='update-ability'),
+    #path('add-ritual/', views.addRitual, name='add-ritual'),
+    #path('delete-ritual/', views.deleteRitual, name='delete-ritual'),
+    #path('update-ritual/', views.updateRitual, name='update-ritual'),
+    #path('add-item/', views.addItem, name='add-item'),
+    #path('delete-item/', views.deleteItem, name='delete-item'),
+    #path('update-item/', views.updateItem, name='update-item'),
 
     path('campaigns/', views.campaigns, name='campaigns'),
     path('create-campaign/', views.createCampaign, name='create-campaign'),
