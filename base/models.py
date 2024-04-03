@@ -164,7 +164,7 @@ class Character(models.Model):
         if property == 0:
             value *= 5
 
-        if (value == skill_attribute):
+        if value == skill_attribute:
             return "selected"
         
         return ""
@@ -197,6 +197,7 @@ class Message(models.Model):
     username = models.TextField()
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     body = models.TextField()
+    type = models.IntegerField(default=0)
 
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)

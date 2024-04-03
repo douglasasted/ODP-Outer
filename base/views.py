@@ -86,7 +86,7 @@ def sendMessage(request):
     campaign = Campaign.objects.get(id=request.POST['campaign'])
     body = request.POST['body']
 
-    message = Message.objects.create(user=request.user, username=request.user.username, campaign=campaign, body=body)
+    message = Message.objects.create(user=request.user, username=request.user.username, campaign=campaign, body=body, type=request.POST['type'])
     print(message.campaign)
     message.save()
 
@@ -119,8 +119,12 @@ def characters(request):
 @login_required(login_url='login')
 def character(request, pk):
     character = Character.objects.get(id=pk)
+    try:
+        campaign = Campaign.objects.get(characters=character)
+    except:
+        campaign = None
 
-    context = {'character': character, 'skills': skills, 'skills_count': range(skill_count)}
+    context = {'character': character, 'campaign': campaign, 'skills': skills, 'skills_count': range(skill_count)}
     return render(request, 'base/character/character.html', context)
 
 

@@ -100,85 +100,12 @@
 
         <br>
     </div>
-
     <div>
-        <h2> CHAT </h2>
-        <hr>
-
-        <div id="display">
-        </div>
-
-        <div>
-            <form id="comment-form" method="POST" action="">
-                {% csrf_token %}
-                
-                <input type="text" name="body" id="body"/>
-            </form>
-        </div>
+        {% include "base/chat.html" %}
     </div>
 </div>
 
 <script type="text/javascript">
-
-
-// Function for receiving the messages
-$(document).ready(function() 
-{
-    getMessages();
-
-    setInterval(function()
-    {
-        getMessages();
-    }, 1000);    
-});
-
-
-function getMessages() 
-{
-    $.ajax({
-        type: 'GET',
-        url: "/get-message/{{campaign}}/",
-        success: function(response)
-        {   
-            $("#display").empty();
-            for (var key in response.messages)
-            {
-                var message = response.messages[key];
-
-                var temp="<small>@" + message.username + " | " + message.created + "</small><p>" + message.body + "</p>";
-                    
-                $("#display").append(temp);
-            }
-        },
-        error: function(response) 
-        {
-            alert('An error occurred')
-        }
-    })
-}
-
-
-// Function for sending the message
-$(document).on('submit', '#comment-form', function(e)
-{
-    e.preventDefault();
-
-    $.ajax({
-        type:'POST',
-        url:'/send-message/',
-        data:
-        {
-            campaign:{{ campaign.id }},
-            body:$('#body').val(),
-            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
-        },
-        success: function(data) {
-            //alert(data)
-        }
-    });
-    
-    document.getElementById('body').value = ''
-});
 
 
 // Function for removing a player from the campaign

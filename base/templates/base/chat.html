@@ -1,0 +1,85 @@
+<h2> CHAT </h2>
+<hr>
+
+<div id="display">
+</div>
+
+<div>
+    <form id="comment-form" method="POST" action="">
+        {% csrf_token %}
+        
+        <input type="text" name="body" id="body"/>
+    </form>
+</div>
+
+
+<script type="text/javascript">
+
+// Function for receiving the messages
+$(document).ready(function() 
+{
+    getMessages();
+
+    setInterval(function()
+    {
+        getMessages();
+    }, 1000);
+});
+
+function getMessages() 
+{
+    $.ajax({
+        type: 'GET',
+        url: "/get-message/{{campaign}}/",
+        success: function(response)
+        {   
+            $("#display").empty();
+            for (var key in response.messages)
+            {
+                var message = response.messages[key];
+
+                var temp="<small>@" + message.username + " | " + message.created + "</small><div>" + message.body + "</div><br>";
+
+                if (message.type == 1)
+                    temp = "<small>@" + message.username + " | " + message.created + "</small><div><b>" + message.body + "</b></div><br>"
+
+                $("#display").append(temp);
+            }
+        },
+        error: function(response) 
+        {
+            alert('An error occurred')
+        }
+    })
+}
+
+
+// Function for sending the message
+$(document).on('submit', '#comment-form', function(e)
+{
+    e.preventDefault();
+
+    sendMessage(0, $('#body').val());
+    
+    document.getElementById('body').value = ''
+});
+
+function sendMessage(type, body) 
+{
+    $.ajax({
+        type:'POST',
+        url:'/send-message/',
+        data:
+        {
+            campaign:{{ campaign.id }},
+            body:body,
+            type:type,
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) {
+            //alert(data)
+        }
+    });
+}
+    
+</script>

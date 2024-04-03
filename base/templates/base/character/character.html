@@ -28,6 +28,11 @@
     {
         width: 15%;
     }
+
+    .attribute-box
+    {
+        width: 225px;
+    }
 </style>
 
 <div class="character-container">
@@ -47,11 +52,35 @@
 
 
         <b>Attributes</b> <!--<small> <a href="#">Edit</a></small>-->
-        <div> Agility : <input class="stats-field" onkeyup="updateCharacter()" id="attribute_agility" type="number" value="{{character.attribute_agility}}"/> </div>
-        <div> Strength : <input class="stats-field" onkeyup="updateCharacter()" id="attribute_strength" type="number" value="{{character.attribute_strength}}"/> </div>
-        <div> Intellect : <input class="stats-field" onkeyup="updateCharacter()" id="attribute_intellect" type="number" value="{{character.attribute_intellect}}"/> </div>
-        <div> Vigor : <input class="stats-field" onkeyup="updateCharacter()" id="attribute_vigor" type="number" value="{{character.attribute_vigor}}"/> </div>
-        <div> Presence : <input class="stats-field" onkeyup="updateCharacter()" id="attribute_presence" type="number" value="{{character.attribute_presence}}"/> </div>
+        <div class="attribute-box"> 
+            <button onclick="rollAttribute('attribute_agility')">O</button>
+            <input class="stats-field" onkeyup="updateCharacter()" id="attribute_agility" type="number" value="{{character.attribute_agility}}"/> 
+            Agility
+        </div>
+        <br>
+        <div class="attribute-box">
+            <button onclick="rollAttribute('attribute_strength')">O</button>
+            <input class="stats-field" onkeyup="updateCharacter()" id="attribute_strength" type="number" value="{{character.attribute_strength}}"/> 
+            Strength
+        </div>
+        <br>
+        <div class="attribute-box"> 
+            <button onclick="rollAttribute('attribute_intellect')">O</button>
+            <input class="stats-field" onkeyup="updateCharacter()" id="attribute_intellect" type="number" value="{{character.attribute_intellect}}"/> 
+            Intellect
+        </div>
+        <br>
+        <div class="attribute-box"> 
+            <button onclick="rollAttribute('attribute_vigor')">O</button>
+            <input class="stats-field" onkeyup="updateCharacter()" id="attribute_vigor" type="number" value="{{character.attribute_vigor}}"/> 
+            Vigor
+        </div>
+        <br>
+        <div class="attribute-box">
+            <button onclick="rollAttribute('attribute_presence')">O</button>
+            <input class="stats-field" onkeyup="updateCharacter()" id="attribute_presence" type="number" value="{{character.attribute_presence}}"/> 
+            Presence
+        </div>
         <br>
 
 
@@ -157,6 +186,7 @@
         {% for skill in skills_count %}
 
         <div>
+            <button onclick="rollSkill('{% call_method character 'get_skill_name' skills skill %}')">O</button>
             <label style="font-size:14px">
                 {% call_method character 'get_skill_formatted_name' skills skill %} 
             </label>
@@ -204,11 +234,89 @@
             <textarea id="objective" onkeyup="updateCharacter()">{{character.objective}}</textarea>
         </p>
     </div>
+    <div>
+        {% if campaign != None %}
+
+        {% include "base/chat.html" %}
+    
+        {% endif %}
+    </div>
 </div>
 
 <script>
 
 $(document).ready(updateCharacter());
+
+// Popup for dice rolls
+function showDicePopup(text)
+{
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "bottom-end",
+        showConfirmButton: false,
+        timer: 10000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.onmouseenter = Swal.stopTimer;
+          toast.onmouseleave = Swal.resumeTimer;
+        }
+    });
+
+    Toast.fire({
+        text: text,
+        showCloseButton: true,
+    });
+}
+
+function rollAttribute(attribute)
+{
+    var attributeRolls = rollAttributeDice(attribute);
+
+    var rollMsg = attribute.substring(10, 13).toUpperCase() + " [" + attributeRolls[0] + "] : " + attributeRolls;
+
+    showDicePopup(rollMsg);
+    sendMessage(1, rollMsg);
+}
+
+function rollAttributeDice(attribute)
+{
+    var attributeValue = document.getElementById(attribute).value;
+    var rollsAmount = attributeValue != 0 ? attributeValue : 2;
+    var rolls = new Array(rollsAmount);
+
+
+    for (var i = 0; i < rollsAmount; i++)
+        rolls[i] = Math.ceil(Math.random() * 20);
+    
+    rolls = rolls.sort((x, y) => { return x - y });
+
+    if (attributeValue != 0)
+        rolls = rolls.reverse();
+
+
+    return rolls;
+}
+
+function rollSkill(skill)
+{
+    var attributes = ['attribute_agility', 'attribute_intellect', 'attribute_vigor', 'attribute_presence', 'attribute_strength'];
+    var skillValues = [0, 5, 10, 15];
+    
+
+    var attribute = attributes[document.getElementById(skill + "_attribute").value];
+    var skillValue = skillValues[document.getElementById(skill).value];
+
+    var rolls = rollAttributeDice(attribute);
+
+    var totalRoll = parseInt(rolls[0]) + skillValue;
+
+
+    var rollMsg = skill[6].toUpperCase() + skill.substring(7).replace("_", ' ') + " [" + totalRoll + "] = " + rolls[0] + " + " + skillValue + " (" + rolls + ")";
+
+
+    showDicePopup(rollMsg);
+    sendMessage(1, rollMsg);
+}
 
 function updateCharacter() 
 {
@@ -217,7 +325,7 @@ function updateCharacter()
 
     $.ajax({
         type:'POST',
-        url:'/update-character/{{character.id}}/',
+        url:'{% url 'update-character' character.id %}',
         data:
         {
             attribute_agility:$('#attribute_agility').val(),
