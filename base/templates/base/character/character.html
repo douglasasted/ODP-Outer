@@ -213,8 +213,8 @@
     <!-- Right Tab -->
     <div>
         <button class="tab-link" onclick="openPage('combat-tab', this)">Combat</button> 
-        <button id="default-open" class="tab-link" onclick="openPage('abilities-tab', this)"> Abilities </button> 
-        <button class="tab-link" onclick="openPage('rituals-tab', this)"> Rituals </button> 
+        <button class="tab-link" onclick="openPage('abilities-tab', this)"> Abilities </button> 
+        <button id="default-open" class="tab-link" onclick="openPage('rituals-tab', this)"> Rituals </button> 
         <button class="tab-link" onclick="openPage('inventory-tab', this)"> Inventory </button> 
         <button class="tab-link" onclick="openPage('description-tab', this)"> Description </button>
 
@@ -271,7 +271,7 @@
                 <p id="ability-{{ ability.id }}-description">{{ability.description}}</p>
                 <button onclick="deleteAbility('{{ ability.id }}', this)">Delete</button>
                 /
-                <button onclick="openUpdateModal('{{ ability.id }}')">Edit</button>
+                <button onclick="openUpdateAbilityModal('{{ ability.id }}')">Edit</button>
                 <hr>
             </div>
 
@@ -279,9 +279,210 @@
         </div>
         <!-- Rituals -->
         <div id="rituals-tab" class="tab-content">
-            <h3>
-                Rituals
-            </h3>
+            <dialog id="new-ritual-modal">
+                <h3> New Ritual </h3>
+                <p>
+                    <label>Name</label>
+                    <input id="new-ritual-name" type="text"/>
+                </p>
+                <select id="new-ritual-element">
+                    <option value="0">Blood</option>
+                    <option value="1">Death</option>
+                    <option value="2">Knowledge</option>
+                    <option value="3">Enery</option>
+                    <option value="4">Fear</option>
+                    <option value="5">Varies</option>
+                </select>
+                <select id="new-ritual-circle">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+                <p>
+                    <label>Range</label>
+                    <input id="new-ritual-range" type="text"/>
+                </p>
+                <p>
+                    <label>Area</label>
+                    <input id="new-ritual-area" type="text"/>
+                </p>
+                <p>
+                    <label>Duration</label>
+                    <input id="new-ritual-duration" type="text"/>
+                </p>
+                <p>
+                    <label>Effect</label>
+                    <input id="new-ritual-effect" type="text"/>
+                </p>
+                <p>
+                    <label>Resistance</label>
+                    <input id="new-ritual-resistance" type="text"/>
+                </p>
+                <p>
+                    <label>Dices</label>
+                    <input id="new-ritual-dices" type="text"/>
+                </p>
+                <p>
+                    <label>Risen Dices</label>
+                    <input id="new-ritual-risen-dices" type="text"/>
+                </p>
+                <p>
+                    <label>True Dices</label>
+                    <input id="new-ritual-true-dices" type="text"/>
+                </p>
+                <p>
+                    <label>Description</label>
+                    <textarea id="new-ritual-description"></textarea>
+                </p>
+                <button onclick="addNewRitual(this.parentElement.parentElement)"> Add ritual </button>
+                <button onclick="newRitualModal.close()"> Cancel </button>
+            </dialog>
+            
+            <dialog id="update-ritual-modal">
+                <h3> Edit Ritual </h3>
+                <input id="update-ritual-id" type="hidden"/>
+                <p>
+                    <label>Name</label>
+                    <input id="update-ritual-name" type="text"/>
+                </p>
+                <select id="update-ritual-element">
+                    <option value="0">Blood</option>
+                    <option value="1">Death</option>
+                    <option value="2">Knowledge</option>
+                    <option value="3">Energy</option>
+                    <option value="4">Fear</option>
+                    <option value="5">Varies</option>
+                </select>
+                <select id="update-ritual-circle">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+                <p>
+                    <label>Range</label>
+                    <input id="update-ritual-range" type="text"/>
+                </p>
+                <p>
+                    <label>Area</label>
+                    <input id="update-ritual-area" type="text"/>
+                </p>
+                <p>
+                    <label>Duration</label>
+                    <input id="update-ritual-duration" type="text"/>
+                </p>
+                <p>
+                    <label>Effect</label>
+                    <input id="update-ritual-effect" type="text"/>
+                </p>
+                <p>
+                    <label>Resistance</label>
+                    <input id="update-ritual-resistance" type="text"/>
+                </p>
+                <p>
+                    <label>Dices</label>
+                    <input id="update-ritual-dices" type="text"/>
+                </p>
+                <p>
+                    <label>Risen Dices</label>
+                    <input id="update-ritual-risen-dices" type="text"/>
+                </p>
+                <p>
+                    <label>True Dices</label>
+                    <input id="update-ritual-true-dices" type="text"/>
+                </p>
+                <p>
+                    <label>Description</label>
+                    <textarea id="update-ritual-description"></textarea>
+                </p>
+                <button onclick="updateRitual()"> Edit </button>
+                <button onclick="updateRitualModal.close()"> Cancel </button>
+            </dialog>
+
+            <h3> Rituals </h3>
+            <button onclick="newRitualModal.showModal()"> New Ritual </button>
+            
+            <br>
+            <br>
+            
+            <hr>
+
+            {% for ritual in rituals %}
+            
+            <div>
+                <p>
+                    <b id="ritual-{{ ritual.id }}-name">{{ritual.name}}</b>
+                    
+                    <br>
+                    
+                    <spam id="ritual-{{ ritual.id }}-element">{{ elements|index:ritual.element }}</spam> 
+                    /
+                    <spam id="ritual-{{ ritual.id }}-circle">{{ritual.circle}}</spam>
+                </p>
+
+                {% if ritual.range != "" %}
+                <div>
+                    <label> Range: </label>
+                    <spam id="ritual-{{ ritual.id }}-range">{{ritual.range}}</spam>
+                </div>
+                {% endif %}
+                {% if ritual.area != "" %}
+                <div>
+                    <label> Area: </label>
+                    <spam id="ritual-{{ ritual.id }}-area">{{ritual.area}}</spam>
+                </div>
+                {% endif %}
+                {% if ritual.duration != "" %}
+                <div>
+                    <label> Duration: </label>
+                    <spam id="ritual-{{ ritual.id }}-duration">{{ritual.duration}}</spam>
+                </div>
+                {% endif %}
+                {% if ritual.effect != "" %}
+                <div>
+                    <label> Effect: </label>
+                    <spam id="ritual-{{ ritual.id }}-effect">{{ritual.effect}}</spam>
+                </div>
+                {% endif %}
+                {% if ritual.resistance != "" %}
+                <div>
+                    <label> Resistance: </label>
+                    <spam id="ritual-{{ ritual.id }}-resistance">{{ritual.resistance}}</spam>
+                </div>
+                {% endif %}
+                <div>
+                    {% if ritual.dices != "" %}
+                    <label> Dices: </label>
+                    <b>
+                        <spam id="ritual-{{ ritual.id }}-dices">{{ritual.dices}}</spam> 
+                    </b>
+                    / 
+                    {% endif %}
+                    {% if ritual.risen_dices != "" %}
+                    <label> Risen Dices: </label>
+                    <b>
+                        <spam id="ritual-{{ ritual.id }}-risen-dices">{{ritual.risen_dices}}</spam>
+                    </b>
+                    /
+                    {% endif %}
+                    {% if ritual.true_dices != "" %}
+                    <label> True Dices: </label>
+                    <b>
+                        <spam id="ritual-{{ ritual.id }}-true-dices">{{ritual.true_dices}}</spam>
+                    </b>
+                    {% endif %}
+                </div>
+
+                <p id="ritual-{{ ritual.id }}-description">{{ritual.description}}</p>
+
+                <button onclick="deleteRitual('{{ ritual.id }}', this)">Delete</button>
+                /
+                <button onclick="openUpdateRitualModal('{{ ritual.id }}')">Edit</button>
+                <hr>
+            </div>
+
+            {% endfor %}
         </div>
         <!-- Inventory -->
         <div id="inventory-tab" class="tab-content">
@@ -349,8 +550,28 @@ function openPage(pageName, elmnt)
     document.getElementById(pageName).style.display = "block";
 }
 
+function updateModalHTML(modal, property, id, input)
+{
+    var updatedElement = document.getElementById('update-' + modal + '-' + property);
+    var updatedContent = document.getElementById(modal + '-' + id + '-' + property).innerHTML;
+
+    if (updatedContent == null)
+        updatedContent = "";
+
+    if (input == true)
+    {
+        updatedElement.value = updatedContent;
+        return;
+    }
+
+    updatedElement.innerHTML = updatedContent;
+}
+
 document.getElementById("default-open").click();
 
+//-----------------------------
+// Ability tab
+//-----------------------------
 const newAbilityModal = document.getElementById('new-ability-modal');
 const updateAbilityModal = document.getElementById('update-ability-modal');
 
@@ -376,7 +597,7 @@ function addNewAbility(abilitiesElmnt)
             //console.log(data)
             console.log(abilitiesElmnt);
             if (data != -1)
-                abilitiesElmnt.innerHTML += "<div><b id=\"ability-" + data + "-name\"> " + abilityName + "</b><p id=\"ability-" + data + "-name\">" + abilityDescription + "</p><button onclick=\"deleteAbility('" + data + "', this)\">Delete</button> / <button onclick=\"openEditModal('" + data + "')\">Edit</button><hr></div>"
+                abilitiesElmnt.innerHTML += "<div><b id=\"ability-" + data + "-name\"> " + abilityName + "</b><p id=\"ability-" + data + "-name\">" + abilityDescription + "</p><button onclick=\"deleteAbility('" + data + "', this)\">Delete</button> / <button onclick=\"openAbilityUpdateModal('" + data + "')\">Edit</button><hr></div>"
         }
     });
 
@@ -405,16 +626,16 @@ function deleteAbility(ability, abilityElmnt)
     });
 }
 
-function openUpdateModal(ability)
+function openUpdateAbilityModal(ability)
 {
     updateAbilityModal.showModal();
 
     document.getElementById('update-ability-id').value = ability;
-    document.getElementById('update-ability-name').value = document.getElementById('ability-' + ability + '-name').innerHTML;
-    document.getElementById('update-ability-description').innerHTML = document.getElementById('ability-' + ability + '-description').innerHTML;
+    updateModalHTML('ability', 'name', ability, true);
+    updateModalHTML('ability', 'description', ability, false);
 }
 
-function updateAbility(ability)
+function updateAbility()
 {
     //console.log("Deleting ability...");
     
@@ -447,6 +668,283 @@ function updateAbility(ability)
     });
 
     updateAbilityModal.close();
+}
+
+//-----------------------------
+// Rituals tab
+//-----------------------------
+const newRitualModal = document.getElementById('new-ritual-modal');
+const updateRitualModal = document.getElementById('update-ritual-modal');
+    
+var elements = ['Blood', 'Death', 'Knowledge', 'Energy', 'Fear', 'Varies']
+
+function addNewRitual(ritualElmnt)
+{
+    //console.log("Adding new ritual...");
+
+    var ritualName = $('#new-ritual-name').val();
+
+    var ritualElement = $('#new-ritual-element').val();
+    var ritualCircle = $('#new-ritual-circle').val();
+
+    var ritualRange = $('#new-ritual-range').val();
+    var ritualArea = $('#new-ritual-area').val();
+    var ritualDuration = $('#new-ritual-duration').val();
+    var ritualEffect = $('#new-ritual-effect').val();
+    var ritualResistance = $('#new-ritual-resistance').val();
+
+    var ritualDices = $('#new-ritual-dices').val();
+    var ritualRisenDices = $('#new-ritual-risen-dices').val();
+    var ritualTrueDices = $('#new-ritual-true-dices').val();
+    
+    var ritualDescription = $('#new-ritual-description').val();
+
+    $.ajax({
+        type:'POST',
+        url:'{% url 'add-ritual' %}',
+        data:
+        {
+            character: {{ character.id }},
+            name: ritualName,
+
+            element: ritualElement,
+            circle: ritualCircle,
+
+            range: ritualRange,
+            area: ritualArea,
+            duration: ritualDuration,
+            effect: ritualEffect,
+            resistance: ritualResistance,
+
+            dices: ritualDices,
+            risen_dices: ritualRisenDices,
+            true_dices: ritualTrueDices,
+
+            description: ritualDescription,
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) 
+        {
+            //console.log(data)
+            console.log(ritualElmnt);
+            if (data != -1)
+            {
+                // Header of the ritual
+                ritualElmnt.innerHTML += `
+                <div>
+                    <b id="ritual-` + data + `-name">` + ritualName + `</b>
+
+                    <br>
+
+                    <p>
+                        <spam id="ritual-` + data + `-element">` + elements[ritualElement] + `</spam> 
+                        /
+                        <spam id="ritual-` + data + `-circle">` + ritualCircle + `</spam>
+                    </p>
+                    
+                    <div>`;
+
+                // Optional elements that the ritual may or may not have
+
+                if (ritualRange != "")
+                    ritualElmnt.innerHTML += `
+                    <div>
+                        <label> Range: </label>
+                        <spam id="ritual-` + data + `}-range">{{ritual.range}}</spam>
+                    </div>`;
+                
+                if (ritualArea != "")
+                    ritualElmnt.innerHTML += `
+                    <div>
+                        <label> Area: </label>
+                        <spam id="ritual-` + data + `-area">{{ritual.area}}</spam>
+                    </div>`;
+                
+                if (ritualDuration != "")
+                    ritualElmnt.innerHTML += `
+                    <div>
+                        <label> Duration: </label>
+                        <spam id="ritual-` + data + `-duration">{{ritual.duration}}</spam>
+                    </div>`;
+
+                if (ritualEffect != "")
+                    ritualElmnt.innerHTML += `
+                    <div>
+                        <label> Effect: </label>
+                        <spam id="ritual-` + data + `-effect">{{ritual.effect}}</spam>
+                    </div>`;
+                    
+                if (ritualResistance != "")
+                    ritualElmnt.innerHTML += `
+                    <div>
+                        <label> Resistance: </label>
+                        <spam id="ritual-` + data + `-resistance">{{ritual.resistance}}</spam>
+                    </div>`;
+                
+                ritualElmnt.innerHTML += `<div>`;
+                    
+                if (ritualDices != "")
+                    ritualElmnt.innerHTML += `
+                    <label> Dices: </label>
+                    <b>
+                        <spam id="ritual-` + data + `-dices">` + ritualDices + `</spam> 
+                    </b>
+                    / `;
+                    
+                if (ritualRisenDices != "")
+                    ritualElmnt.innerHTML += `
+                    <label> Risen Dices: </label>
+                    <b>
+                        <spam id="ritual-` + data + `-risen-dices">` + ritualRisenDices + `</spam>
+                    </b>
+                    /`;
+                    
+                if (ritualTrueDices != "")
+                    ritualElmnt.innerHTML += `
+                    <label> True Dices: </label>
+                    <b>
+                        <spam id="ritual-` + data + `-true-dices">` + ritualTrueDices + `}</spam>
+                    </b>`;
+                    
+
+                // Footer of the ritual
+                ritualElmnt.innerHTML += `</div>
+                    
+                    <p id="ritual-` + data + `-description">` + ritualDescription + `</p>
+
+                    <button onclick="deleteRitual(` + data + `, this)">Delete</button>
+                    /
+                    <button onclick="openUpdateRitualModal('` + data + `')">Edit</button>
+                    <hr>
+                </div>`;
+            }
+        }
+    });
+
+    newRitualModal.close();
+}
+
+function deleteRitual(ritual, ritualElmnt)
+{
+    //console.log("Deleting ritual...");
+    
+    $.ajax({
+        type:'POST',
+        url:'{% url 'delete-ritual' %}',
+        data:
+        {
+            character: {{ character.id }},
+            ritual: ritual,
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) 
+        {
+            //console.log(data)
+            if (data != -1)
+                ritualElmnt.parentElement.remove();
+        }
+    });
+}
+
+function openUpdateRitualModal(ritual)
+{
+    updateRitualModal.showModal();
+
+    document.getElementById('update-ritual-id').value = ritual;
+    updateModalHTML('ritual', 'name', ritual, true);
+
+    document.getElementById('update-ritual-element').value = elements.indexOf(document.getElementById('ritual-' + ritual + '-element').innerHTML);
+    updateModalHTML('ritual', 'circle', ritual, true);
+
+    updateModalHTML('ritual', 'range', ritual, true);
+    updateModalHTML('ritual', 'area', ritual, true);
+    updateModalHTML('ritual', 'duration', ritual, true);
+    updateModalHTML('ritual', 'effect', ritual, true);
+    updateModalHTML('ritual', 'resistance', ritual, true);
+
+    updateModalHTML('ritual', 'dices', ritual, true);
+    updateModalHTML('ritual', 'risen-dices', ritual, true);
+    updateModalHTML('ritual', 'true-dices', ritual, true);
+
+    updateModalHTML('ritual', 'description', ritual, false);
+}
+
+function updateRitual()
+{
+    //console.log("Deleting ability...");
+    
+    var ritual = $('#update-ritual-id').val();
+
+    var ritualName = $('#update-ritual-name').val();
+
+    var ritualElement = $('#update-ritual-element').val();
+    var ritualCircle = $('#update-ritual-circle').val();
+
+    var ritualRange = $('#update-ritual-range').val();
+    var ritualArea = $('#update-ritual-area').val();
+    var ritualDuration = $('#update-ritual-duration').val();
+    var ritualEffect = $('#update-ritual-effect').val();
+    var ritualResistance = $('#update-ritual-resistance').val();
+
+    var ritualDices = $('#update-ritual-dices').val();
+    var ritualRisenDices = $('#update-ritual-risen-dices').val();
+    var ritualTrueDices = $('#update-ritual-true-dices').val();
+    
+    var ritualDescription = $('#update-ritual-description').val();
+
+    $.ajax({
+        type:'POST',
+        url:'{% url 'update-ritual' %}',
+        data:
+        {
+            character: {{ character.id }},
+            ritual: ritual,
+            name: ritualName,
+
+            element: ritualElement,
+            circle: ritualCircle,
+            
+            range: ritualRange,
+            area: ritualArea,
+            duration: ritualDuration,
+            effect: ritualEffect,
+            resistance: ritualResistance,
+
+            dices: ritualDices,
+            risen_dices: ritualRisenDices,
+            true_dices: ritualTrueDices,
+
+            description: ritualDescription,
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) 
+        {
+            //console.log(data)
+
+            // Update on page html
+            if (data != -1)
+            {
+                document.getElementById('ritual-' + data + '-name').innerHTML = ritualName;
+
+                document.getElementById('ritual-' + data + '-element').innerHTML = elements[ritualElement];
+                document.getElementById('ritual-' + data + '-circle').innerHTML = ritualCircle;
+
+                document.getElementById('ritual-' + data + '-range').innerHTML = ritualRange;
+                document.getElementById('ritual-' + data + '-area').innerHTML = ritualArea;
+                document.getElementById('ritual-' + data + '-duration').innerHTML = ritualDuration;
+                document.getElementById('ritual-' + data + '-effect').innerHTML = ritualEffect;
+                document.getElementById('ritual-' + data + '-resistance').innerHTML = ritualResistance;
+            
+                document.getElementById('ritual-' + data + '-dices').innerHTML = ritualDices;
+                document.getElementById('ritual-' + data + '-risen-dices').innerHTML = ritualRisenDices;
+                document.getElementById('ritual-' + data + '-true-dices').innerHTML = ritualTrueDices;
+
+                document.getElementById('ritual-' + data + '-description').innerHTML = ritualDescription;
+            }
+        }
+    });
+
+    updateRitualModal.close();
 }
 
 //-----------------------------

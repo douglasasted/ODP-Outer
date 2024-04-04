@@ -121,9 +121,11 @@ def character(request, pk):
     character = Character.objects.get(id=pk)
     campaign = get_campaign(character)
 
+    elements = ['Blood', 'Death', 'Knowledge', 'Energy', 'Fear', 'Varies']
     abilities = Ability.objects.filter(character=character)
+    rituals = Ritual.objects.filter(character=character)
 
-    context = {'character': character, 'campaign': campaign, 'skills': skills, 'skills_count': range(skill_count), 'abilities':abilities}
+    context = {'character': character, 'campaign': campaign, 'skills': skills, 'skills_count': range(skill_count), 'abilities':abilities, 'rituals':rituals, 'elements': elements}
     return render(request, 'base/character/character.html', context)
 
 
@@ -256,6 +258,82 @@ def updateAbility(request):
     ability.save()
 
     return HttpResponse(0)
+
+
+@login_required(login_url='login')
+def addRitual(request):
+    character = Character.objects.get(id=request.POST['character'])
+    campaign = get_campaign(character)
+
+    if (request.user == character.player or (campaign != None and request.user == campaign.owner)) == False:
+        return HttpResponse(-1)
+
+    ritual = Ritual.objects.create(
+        character=character, 
+        name=request.POST['name'], 
+
+        element=request.POST['element'],
+        circle=request.POST['circle'],
+
+        range=request.POST['range'],
+        area=request.POST['area'],
+        duration=request.POST['duration'],
+        effect=request.POST['effect'],
+        resistance=request.POST['resistance'],
+
+        dices=request.POST['dices'],
+        risen_dices=request.POST['risen_dices'],
+        true_dices=request.POST['true_dices'],
+
+        description=request.POST['description'])
+    ritual.save()
+
+    return HttpResponse(ritual.id)
+
+
+@login_required(login_url='login')
+def deleteRitual(request):
+    character = Character.objects.get(id=request.POST['character'])
+    campaign = get_campaign(character)
+
+    if (request.user == character.player or (campaign != None and request.user == campaign.owner)) == False:
+        return HttpResponse(-1)
+
+    ritual = Ritual.objects.get(id=request.POST['ritual'])
+    ritual.delete()
+
+    return HttpResponse(0)
+
+
+@login_required(login_url='login')
+def updateRitual(request):
+    character = Character.objects.get(id=request.POST['character'])
+    campaign = get_campaign(character)
+
+    if (request.user == character.player or (campaign != None and request.user == campaign.owner)) == False:
+        return HttpResponse(-1)
+
+    ritual = Ritual.objects.get(id=request.POST['ritual'])
+
+    ritual.name = request.POST['name']
+
+    ritual.element = request.POST['element']
+    ritual.circle = request.POST['circle']
+
+    ritual.range = request.POST['range']
+    ritual.area = request.POST['area']
+    ritual.duration = request.POST['duration']
+    ritual.effect = request.POST['effect']
+    ritual.resistance = request.POST['resistance']
+
+    ritual.dices = request.POST['dices']
+    ritual.risen_dices = request.POST['risen_dices']
+    ritual.true_dices = request.POST['true_dices']
+
+    ritual.description = request.POST['description']
+    ritual.save()
+
+    return HttpResponse(ritual.id)
 
 
 # ---------------------------
