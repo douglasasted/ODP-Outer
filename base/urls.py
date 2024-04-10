@@ -25,9 +25,9 @@ urlpatterns = [
     path('add-ritual/', views.addRitual, name='add-ritual'),
     path('delete-ritual/', views.deleteRitual, name='delete-ritual'),
     path('update-ritual/', views.updateRitual, name='update-ritual'),
-    #path('add-item/', views.addItem, name='add-item'),
-    #path('delete-item/', views.deleteItem, name='delete-item'),
-    #path('update-item/', views.updateItem, name='update-item'),
+    path('add-item/', views.addItem, name='add-item'),
+    path('delete-item/', views.deleteItem, name='delete-item'),
+    path('update-item/', views.updateItem, name='update-item'),
 
     path('campaigns/', views.campaigns, name='campaigns'),
     path('create-campaign/', views.createCampaign, name='create-campaign'),

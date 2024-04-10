@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Character, Campaign, Message, Ability, Ritual
+from .models import Character, Campaign, Message, Ability, Ritual, GeneralItem, WeaponItem, ProtectionItem, CursedItem
 from .forms import CharacterForm, CampaignForm
 from django.http import HttpResponse, JsonResponse
 import math
@@ -125,7 +125,26 @@ def character(request, pk):
     abilities = Ability.objects.filter(character=character)
     rituals = Ritual.objects.filter(character=character)
 
-    context = {'character': character, 'campaign': campaign, 'skills': skills, 'skills_count': range(skill_count), 'abilities':abilities, 'rituals':rituals, 'elements': elements}
+    general_items = GeneralItem.objects.filter(character=character)
+    weapon_items = WeaponItem.objects.filter(character=character)
+    protection_items = ProtectionItem.objects.filter(character=character)
+    cursed_items = CursedItem.objects.filter(character=character)
+
+    context = {
+        'character': character, 
+        'campaign': campaign, 
+        'skills': skills, 
+        'skills_count': range(skill_count), 
+        
+        'abilities':abilities, 
+        'rituals':rituals, 
+
+        'general_items':general_items,
+        'weapon_items':weapon_items,
+        'protection_items':protection_items,
+        'cursed_items':cursed_items,
+        
+        'elements': elements}
     return render(request, 'base/character/character.html', context)
 
 
@@ -198,7 +217,19 @@ def updateCharacter(request, pk):
     character.protection = request.POST['protection']
     character.resistance = request.POST['resistance']
     character.proficiency = request.POST['proficiency']
-        
+
+    character.prestige = request.POST['prestige']
+    character.patent = request.POST['patent']
+
+    character.category_limit_1 = request.POST['category_limit_1']
+    character.category_limit_2 = request.POST['category_limit_2']
+    character.category_limit_3 = request.POST['category_limit_3']
+    character.category_limit_4 = request.POST['category_limit_4']
+
+    character.credit_limit = request.POST['credit_limit']
+    character.current_weight = request.POST['current_weight']
+    character.max_weight = request.POST['max_weight']
+    
     for skill in skills:
         value = request.POST.get(skill, False)
 
@@ -334,6 +365,151 @@ def updateRitual(request):
     ritual.save()
 
     return HttpResponse(ritual.id)
+
+
+@login_required(login_url='login')
+def addItem(request):
+    character = Character.objects.get(id=request.POST['character'])
+    campaign = get_campaign(character)
+
+    if (request.user == character.player or (campaign != None and request.user == campaign.owner)) == False:
+        return HttpResponse(-1)
+
+    item_type = int(request.POST['item_type'])
+    item = None
+
+    spaces = request.POST['spaces'] if request.POST['spaces'] != "" else 0
+
+    if item_type == 0:
+        item = GeneralItem.objects.create(
+            character=character, 
+            name=request.POST['name'],
+            description=request.POST['description'],
+            category=request.POST['category'],
+            spaces=spaces,
+
+            tag=request.POST['tag'])
+    elif item_type == 1:
+        item = WeaponItem.objects.create(
+            character=character, 
+            name=request.POST['name'],
+            description=request.POST['description'],
+            category=request.POST['category'],
+            spaces=spaces,
+
+            proficiency=request.POST['proficiency'],
+            weapon_type=request.POST['weapon_type'],
+            grip_type=request.POST['grip_type'],
+
+            damage=request.POST['damage'],
+            secondary_damage=request.POST['secondary_damage'],
+            critical=request.POST['critical'],
+            multiplier=request.POST['multiplier'],
+            damage_type=request.POST['damage_type'],
+            range=request.POST['range'])
+    elif item_type == 2:
+        item = ProtectionItem.objects.create(
+            character=character, 
+            name=request.POST['name'],
+            description=request.POST['description'],
+            category=request.POST['category'],
+            spaces=spaces,
+
+            defense=request.POST['defense'],)
+    elif item_type == 3:
+        item = CursedItem.objects.create(
+            character=character, 
+            name=request.POST['name'],
+            description=request.POST['description'],
+            category=request.POST['category'],
+            spaces=spaces,
+
+            element=request.POST['element'])
+    else:
+        return HttpResponse(-1)
+
+    item.save()
+
+    return HttpResponse(item.id)
+
+
+@login_required(login_url='login')
+def deleteItem(request):
+    character = Character.objects.get(id=request.POST['character'])
+    campaign = get_campaign(character)
+
+    if (request.user == character.player or (campaign != None and request.user == campaign.owner)) == False:
+        return HttpResponse(-1)
+
+    item_type = int(request.POST['item_type'])
+    item = None
+    id = request.POST['item']
+    
+    if item_type == 0:
+        item = GeneralItem.objects.get(id=id)
+    elif item_type == 1:
+        item = WeaponItem.objects.get(id=id)
+    elif item_type == 2:
+        item = ProtectionItem.objects.get(id=id)
+    elif item_type == 3:
+        item = CursedItem.objects.get(id=id)
+    else:
+        return HttpResponse(-1)
+    
+    item.delete()
+
+    return HttpResponse(0)
+
+
+@login_required(login_url='login')
+def updateItem(request):
+    character = Character.objects.get(id=request.POST['character'])
+    campaign = get_campaign(character)
+
+    if (request.user == character.player or (campaign != None and request.user == campaign.owner)) == False:
+        return HttpResponse(-1)
+
+    item_type = int(request.POST['item_type'])
+    item = None
+    id = request.POST['item']
+    
+    if item_type == 0:
+        item = GeneralItem.objects.get(id=id)        
+
+        item.tag=request.POST['tag']
+    elif item_type == 1:
+        item = WeaponItem.objects.get(id=id)
+
+        item.proficiency=request.POST['proficiency']
+        item.weapon_type=request.POST['weapon_type']
+        item.grip_type=request.POST['grip_type']
+
+        item.damage=request.POST['damage']
+        item.secondary_damage=request.POST['secondary_damage']
+        item.critical=request.POST['critical']
+        item.multiplier=request.POST['multiplier']
+        item.damage_type=request.POST['damage_type']
+        item.range=request.POST['range']
+    elif item_type == 2:
+        item = ProtectionItem.objects.get(id=id)
+
+        item.defense=request.POST['defense']
+    elif item_type == 3:
+        item = CursedItem.objects.get(id=id)
+
+        item.element=request.POST['element']
+    else:
+        return HttpResponse(-1)
+    
+    item.name=request.POST['name']
+    
+    item.category=request.POST['category']
+    item.spaces=request.POST['spaces']
+
+    item.description=request.POST['description']
+    item.save()
+
+    return HttpResponse(item.id)
 
 
 # ---------------------------

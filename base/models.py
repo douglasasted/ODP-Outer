@@ -41,7 +41,7 @@ class Character(models.Model):
     objective = models.TextField(null=True, blank=True)
 
     prestige = models.IntegerField(default=0)
-    patent = models.CharField(null=True, blank=True, max_length=200)
+    patent = models.IntegerField(null=True, blank=True)
     category_limit_1 = models.IntegerField(default=0)
     category_limit_2 = models.IntegerField(default=0)
     category_limit_3 = models.IntegerField(default=0)

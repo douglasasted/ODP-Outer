@@ -37,6 +37,7 @@
 
 <div class="character-container">
     {%csrf_token%}
+
     <!-- Base Information -->
     <div>
         <h1>{{ character.name }}</h1>
@@ -214,8 +215,8 @@
     <div>
         <button class="tab-link" onclick="openPage('combat-tab', this)">Combat</button> 
         <button class="tab-link" onclick="openPage('abilities-tab', this)"> Abilities </button> 
-        <button id="default-open" class="tab-link" onclick="openPage('rituals-tab', this)"> Rituals </button> 
-        <button class="tab-link" onclick="openPage('inventory-tab', this)"> Inventory </button> 
+        <button class="tab-link" onclick="openPage('rituals-tab', this)"> Rituals </button> 
+        <button id="default-open" class="tab-link" onclick="openPage('inventory-tab', this)"> Inventory </button> 
         <button class="tab-link" onclick="openPage('description-tab', this)"> Description </button>
 
         <!-- Combat -->
@@ -227,42 +228,46 @@
         <!-- Abilities -->
         <div id="abilities-tab" class="tab-content">
             
+            <!-- New Ability Modal -->
             <dialog id="new-ability-modal">
                 <h3> New Ability </h3>
                 <p>
-                    <label>Name</label>
-                    <input id="new-ability-name" type="text"/>
+                    <label>*Name</label>
+                    <input onkeyup="checkModalRequirements('ability', 'new')" id="new-ability-name" type="text"/>
                 </p>
                 <p>
                     <label>Description</label>
                     <textarea id="new-ability-description"></textarea>
                 </p>
-                <button onclick="addNewAbility(this.parentElement.parentElement)"> Add ability </button>
+                <button id="new-ability-button" onclick="addNewAbility()"> Add ability </button>
                 <button onclick="newAbilityModal.close()"> Cancel </button>
             </dialog>
             
+            <!-- Update Ability Modal -->
             <dialog id="update-ability-modal">
                 <h3> Edit Ability </h3>
                 <input id="update-ability-id" type="hidden"/>
                 <p>
-                    <label>Name</label>
-                    <input id="update-ability-name" type="text"/>
+                    <label>*Name</label>
+                    <input onkeyup="checkModalRequirements('ability', 'update')" id="update-ability-name" type="text"/>
                 </p>
                 <p>
                     <label>Description</label>
                     <textarea id="update-ability-description"></textarea>
                 </p>
-                <button onclick="updateAbility()"> Edit </button>
+                <button id="update-ability-button" onclick="updateAbility()"> Edit </button>
                 <button onclick="updateAbilityModal.close()"> Cancel </button>
             </dialog>
 
             <h3> Abilities </h3>
-            <button onclick="newAbilityModal.showModal()"> New Ability </button>
+            <button onclick="newAbilityModal.showModal(); checkModalRequirements('ability', 'new')"> New Ability </button>
             
             <br>
             <br>
             
             <hr>
+
+            <div id="abilities-list">
 
             {% for ability in abilities %}
             
@@ -271,19 +276,21 @@
                 <p id="ability-{{ ability.id }}-description">{{ability.description}}</p>
                 <button onclick="deleteAbility('{{ ability.id }}', this)">Delete</button>
                 /
-                <button onclick="openUpdateAbilityModal('{{ ability.id }}')">Edit</button>
+                <button onclick="openUpdateAbilityModal('{{ ability.id }}'); checkModalRequirements('ability', 'update')">Edit</button>
                 <hr>
             </div>
 
             {% endfor %}
+
+            </div>
         </div>
         <!-- Rituals -->
         <div id="rituals-tab" class="tab-content">
             <dialog id="new-ritual-modal">
                 <h3> New Ritual </h3>
                 <p>
-                    <label>Name</label>
-                    <input id="new-ritual-name" type="text"/>
+                    <label>*Name</label>
+                    <input onkeyup="checkModalRequirements('ritual', 'new')" id="new-ritual-name" type="text"/>
                 </p>
                 <select id="new-ritual-element">
                     <option value="0">Blood</option>
@@ -335,7 +342,7 @@
                     <label>Description</label>
                     <textarea id="new-ritual-description"></textarea>
                 </p>
-                <button onclick="addNewRitual(this.parentElement.parentElement)"> Add ritual </button>
+                <button id="new-ritual-button" onclick="addNewRitual()"> Add ritual </button>
                 <button onclick="newRitualModal.close()"> Cancel </button>
             </dialog>
             
@@ -343,8 +350,8 @@
                 <h3> Edit Ritual </h3>
                 <input id="update-ritual-id" type="hidden"/>
                 <p>
-                    <label>Name</label>
-                    <input id="update-ritual-name" type="text"/>
+                    <label>*Name</label>
+                    <input onkeyup="checkModalRequirements('ritual', 'update')" id="update-ritual-name" type="text"/>
                 </p>
                 <select id="update-ritual-element">
                     <option value="0">Blood</option>
@@ -396,99 +403,489 @@
                     <label>Description</label>
                     <textarea id="update-ritual-description"></textarea>
                 </p>
-                <button onclick="updateRitual()"> Edit </button>
+                <button id="update-ritual-button" onclick="updateRitual()"> Edit </button>
                 <button onclick="updateRitualModal.close()"> Cancel </button>
             </dialog>
 
             <h3> Rituals </h3>
-            <button onclick="newRitualModal.showModal()"> New Ritual </button>
+            <button onclick="newRitualModal.showModal(); checkModalRequirements('ritual', 'new')"> New Ritual </button>
             
             <br>
             <br>
             
             <hr>
 
-            {% for ritual in rituals %}
-            
-            <div>
-                <p>
-                    <b id="ritual-{{ ritual.id }}-name">{{ritual.name}}</b>
-                    
-                    <br>
-                    
-                    <spam id="ritual-{{ ritual.id }}-element">{{ elements|index:ritual.element }}</spam> 
-                    /
-                    <spam id="ritual-{{ ritual.id }}-circle">{{ritual.circle}}</spam>
-                </p>
-
-                {% if ritual.range != "" %}
-                <div>
-                    <label> Range: </label>
-                    <spam id="ritual-{{ ritual.id }}-range">{{ritual.range}}</spam>
-                </div>
-                {% endif %}
-                {% if ritual.area != "" %}
-                <div>
-                    <label> Area: </label>
-                    <spam id="ritual-{{ ritual.id }}-area">{{ritual.area}}</spam>
-                </div>
-                {% endif %}
-                {% if ritual.duration != "" %}
-                <div>
-                    <label> Duration: </label>
-                    <spam id="ritual-{{ ritual.id }}-duration">{{ritual.duration}}</spam>
-                </div>
-                {% endif %}
-                {% if ritual.effect != "" %}
-                <div>
-                    <label> Effect: </label>
-                    <spam id="ritual-{{ ritual.id }}-effect">{{ritual.effect}}</spam>
-                </div>
-                {% endif %}
-                {% if ritual.resistance != "" %}
-                <div>
-                    <label> Resistance: </label>
-                    <spam id="ritual-{{ ritual.id }}-resistance">{{ritual.resistance}}</spam>
-                </div>
-                {% endif %}
-                <div>
-                    {% if ritual.dices != "" %}
-                    <label> Dices: </label>
-                    <b>
-                        <spam id="ritual-{{ ritual.id }}-dices">{{ritual.dices}}</spam> 
-                    </b>
-                    / 
-                    {% endif %}
-                    {% if ritual.risen_dices != "" %}
-                    <label> Risen Dices: </label>
-                    <b>
-                        <spam id="ritual-{{ ritual.id }}-risen-dices">{{ritual.risen_dices}}</spam>
-                    </b>
-                    /
-                    {% endif %}
-                    {% if ritual.true_dices != "" %}
-                    <label> True Dices: </label>
-                    <b>
-                        <spam id="ritual-{{ ritual.id }}-true-dices">{{ritual.true_dices}}</spam>
-                    </b>
-                    {% endif %}
-                </div>
-
-                <p id="ritual-{{ ritual.id }}-description">{{ritual.description}}</p>
-
-                <button onclick="deleteRitual('{{ ritual.id }}', this)">Delete</button>
-                /
-                <button onclick="openUpdateRitualModal('{{ ritual.id }}')">Edit</button>
-                <hr>
+            <div id="rituals-list">
+                <!-- Rituals are added in javascript -->
             </div>
-
-            {% endfor %}
         </div>
         <!-- Inventory -->
         <div id="inventory-tab" class="tab-content">
-            <h3>
-                Inventory
-            </h3>
+            
+            <!-- New Item Modals -->
+            <div>
+                <!--(0) General Item Modal-->
+                <dialog id="new-general-item-modal">
+                    <h3> New General Item </h3>
+                    <p>
+                        <label>*Name</label>
+                        <input onkeyup="checkItemModalRequirements('general', 'new')" id="new-general-item-name" type="text"/>
+                    </p>
+                    <label>*Tag</label>
+                    <select id="new-general-item-tag">
+                        <option value="0">Acessory</option>
+                        <option value="1">Explosives</option>
+                        <option value="2">Operational Items</option>
+                        <option value="3">Paranormal Items</option>
+                    </select>
+                    <p>
+                        <label>*Category</label>
+                        <select id="new-general-item-category">
+                            <option value="0">0</option>
+                            <option value="1">I</option>
+                            <option value="2">II</option>
+                            <option value="3">III</option>
+                            <option value="4">IV</option>
+                        </select>
+                        /
+                        <label>*Spaces</label>
+                        <input onkeyup="checkItemModalRequirements('general', 'new')" id="new-general-item-spaces" type="number" value="0"/>
+                    </p>
+                    <p>
+                        <label>Description</label>
+                        <textarea id="new-general-item-description"></textarea>
+                    </p>
+                    <button id="new-general-item-button" onclick="addNewItem(0)"> Add item </button>
+                    <button onclick="newGeneralItemModal.close()"> Cancel </button>
+                </dialog>
+                
+                <!--(1) Weapon Item Modal-->
+                <dialog id="new-weapon-item-modal">
+                    <h3> New Weapon Item </h3>
+                    <p>
+                        <label>*Name</label>
+                        <input onkeyup="checkWeaponModalRequirements('new')" id="new-weapon-item-name" type="text"/>
+                    </p>
+                    <p>
+                        <label>Proficiency</label>
+                        <input id="new-weapon-item-proficiency" type="text"/>
+                        /
+                        <label>Weapon Type</label>
+                        <input id="new-weapon-item-type" type="text"/>
+                        /
+                        <label>Grip Type</label>
+                        <input id="new-weapon-item-grip-type" type="text"/>
+                    </p>
+                    <p>
+                        <label>*Damage</label>
+                        <input onkeyup="checkWeaponModalRequirements('new')" id="new-weapon-item-damage" type="text"/>
+                        /
+                        <label>Secondary Damage</label>
+                        <input id="new-weapon-item-secondary-damage" type="text"/>
+                        /
+                        <label>*Critical</label>
+                        <input onkeyup="checkWeaponModalRequirements('new')" id="new-weapon-item-critical" type="number"/>
+                        /
+                        <label>*Multiplier</label>
+                        <input onkeyup="checkWeaponModalRequirements('new')" id="new-weapon-item-multiplier" type="number"/>
+                    </p>
+                    <p>
+                        <label>Damage Type</label>
+                        <input id="new-weapon-item-damage-type" type="text"/>
+                        /
+                        <label>Range</label>
+                        <input id="new-weapon-item-range" type="text"/>
+                    </p>
+                    <p>
+                        <label>*Category</label>
+                        <select id="new-weapon-item-category">
+                            <option value="0">0</option>
+                            <option value="1">I</option>
+                            <option value="2">II</option>
+                            <option value="3">III</option>
+                            <option value="4">IV</option>
+                        </select>
+                        /
+                        <label>*Spaces</label>
+                        <input onkeyup="checkWeaponModalRequirements('new')" id="new-weapon-item-spaces" type="number"/>
+                    </p>
+                    <p>
+                        <label>Description</label>
+                        <textarea id="new-weapon-item-description"></textarea>
+                    </p>
+                    <button id="new-weapon-item-button" onclick="addNewItem(1)"> Add item </button>
+                    <button onclick="newWeaponItemModal.close()"> Cancel </button>
+                </dialog>
+
+                <!--(2) Protection Item Modal-->
+                <dialog id="new-protection-item-modal">
+                    <h3> New Protection Item </h3>
+                    <p>
+                        <label>*Name</label>
+                        <input onkeyup="checkProtectionModalRequirements('new')" id="new-protection-item-name" type="text"/>
+                    </p>
+                    <p>
+                        <label>*Defense</label>
+                        <input onkeyup="checkProtectionModalRequirements('new')" id="new-protection-item-defense" type="number"/>
+                    </p>
+                    <p>
+                        <label>*Category</label>
+                        <select id="new-protection-item-category">
+                            <option value="0">0</option>
+                            <option value="1">I</option>
+                            <option value="2">II</option>
+                            <option value="3">III</option>
+                            <option value="4">IV</option>
+                        </select>
+                        /
+                        <label>*Spaces</label>
+                        <input onkeyup="checkProtectionModalRequirements('new')" id="new-protection-item-spaces" type="number"/>
+                    </p>
+                    <p>
+                        <label>Description</label>
+                        <textarea id="new-protection-item-description"></textarea>
+                    </p>
+                    <button id="new-protection-item-button" onclick="addNewItem(2)"> Add item </button>
+                    <button onclick="newProtectionItemModal.close()"> Cancel </button>
+                </dialog>
+
+                <!--(3) Cursed Item Modal-->
+                <dialog id="new-cursed-item-modal">
+                    <h3> New Cursed Item </h3>
+                    <p>
+                        <label>*Name</label>
+                        <input onkeyup="checkCursedModalRequirements('new')" id="new-cursed-item-name" type="text"/>
+                    </p>
+                    <label>*Element</label>
+                    <select id="new-cursed-item-element">
+                        <option value="0">Blood</option>
+                        <option value="1">Death</option>
+                        <option value="2">Knowledge</option>
+                        <option value="3">Energy</option>
+                        <option value="4">Fear</option>
+                        <option value="5">Varies</option>
+                    </select>
+                    <p>
+                        <label>*Category</label>
+                        <select id="new-cursed-item-category">
+                            <option value="0">0</option>
+                            <option value="1">I</option>
+                            <option value="2">II</option>
+                            <option value="3">III</option>
+                            <option value="4">IV</option>
+                        </select>
+                        /
+                        <label>*Spaces</label>
+                        <input onkeyup="checkCursedModalRequirements('new')" id="new-cursed-item-spaces" type="number"/>
+                    </p>
+                    <p>
+                        <label>Description</label>
+                        <textarea id="new-cursed-item-description"></textarea>
+                    </p>
+                    <button id="new-cursed-item-button" onclick="addNewItem(3)"> Add item </button>
+                    <button onclick="newCursedItemModal.close()"> Cancel </button>
+                </dialog>
+
+                <!--(4) Ammunition Item Modal-->
+                <dialog id="new-ammunition-item-modal">
+                    <h3> New Ammunition Item </h3>
+                    <p>
+                        <label>*Name</label>
+                        <input onkeyup="checkItemModalRequirements('ammunition', 'new')" id="new-ammunition-item-name" type="text"/>
+                    </p>
+                    <p>
+                        <label>*Category</label>
+                        <select id="new-ammunition-item-category">
+                            <option value="0">0</option>
+                            <option value="1">I</option>
+                            <option value="2">II</option>
+                            <option value="3">III</option>
+                            <option value="4">IV</option>
+                        </select>
+                        /
+                        <label>*Spaces</label>
+                        <input onkeyup="checkItemModalRequirements('ammunition', 'new')" id="new-ammunition-item-spaces" type="number"/>
+                    </p>
+                    <p>
+                        <label>Description</label>
+                        <textarea onkeyup="checkItemModalRequirements('ammunition', 'new')" id="new-ammunition-item-description"></textarea>
+                    </p>
+                    <button id="new-ammunition-item-button" onclick="addNewItem(4)"> Add item </button>
+                    <button onclick="newAmmunitionItemModal.close()"> Cancel </button>
+                </dialog>
+            </div>
+
+            <!-- Update Item Modals -->
+            <div>
+                <!--(0) General Item Modal-->
+                <dialog id="update-general-item-modal">
+                    <input id="update-general-item-id" type="hidden"/>
+                    <h3> Edit General Item </h3>
+                    <p>
+                        <label>*Name</label>
+                        <input onkeyup="checkItemModalRequirements('general', 'update')" id="update-general-item-name" type="text"/>
+                    </p>
+                    <label>*Tag</label>
+                    <select id="update-general-item-tag">
+                        <option value="0">Acessory</option>
+                        <option value="1">Explosives</option>
+                        <option value="2">Operational Items</option>
+                        <option value="3">Paranormal Items</option>
+                    </select>
+                    <p>
+                        <label>*Category</label>
+                        <select id="update-general-item-category">
+                            <option value="0">0</option>
+                            <option value="1">I</option>
+                            <option value="2">II</option>
+                            <option value="3">III</option>
+                            <option value="4">IV</option>
+                        </select>
+                        /
+                        <label>*Spaces</label>
+                        <input onkeyup="checkItemModalRequirements('general', 'update')"  id="update-general-item-spaces" type="number"/>
+                    </p>
+                    <p>
+                        <label>Description</label>
+                        <textarea id="update-general-item-description"></textarea>
+                    </p>
+                    <button id="update-general-item-button" onclick="updateItem(0)"> Edit </button>
+                    <button onclick="updateGeneralItemModal.close()"> Cancel </button>
+                </dialog>
+                
+                <!--(1) Weapon Item Modal-->
+                <dialog id="update-weapon-item-modal">
+                    <input id="update-weapon-item-id" type="hidden"/>
+                    <h3> Edit Weapon Item </h3>
+                    <p>
+                        <label>*Name</label>
+                        <input onkeyup="checkWeaponModalRequirements('update')" id="update-weapon-item-name" type="text"/>
+                    </p>
+                    <p>
+                        <label>Proficiency</label>
+                        <input id="update-weapon-item-proficiency" type="text"/>
+                        /
+                        <label>Weapon Type</label>
+                        <input id="update-weapon-item-type" type="text"/>
+                        /
+                        <label>Grip Type</label>
+                        <input id="update-weapon-item-grip-type" type="text"/>
+                    </p>
+                    <p>
+                        <label>*Damage</label>
+                        <input onkeyup="checkWeaponModalRequirements('update')" id="update-weapon-item-damage" type="text"/>
+                        /
+                        <label>Secondary Damage</label>
+                        <input id="update-weapon-item-secondary-damage" type="text"/>
+                        /
+                        <label>*Critical</label>
+                        <input onkeyup="checkWeaponModalRequirements('update')" id="update-weapon-item-critical" type="text"/>
+                        /
+                        <label>*Multiplier</label>
+                        <input onkeyup="checkWeaponModalRequirements('update')" id="update-weapon-item-multiplier" type="text"/>
+                    </p>
+                    <p>
+                        <label>Damage Type</label>
+                        <input id="update-weapon-item-damage-type" type="text"/>
+                        /
+                        <label>Range</label>
+                        <input id="update-weapon-item-range" type="text"/>
+                    </p>
+                    <p>
+                        <label>*Category</label>
+                        <select id="update-weapon-item-category">
+                            <option value="0">0</option>
+                            <option value="1">I</option>
+                            <option value="2">II</option>
+                            <option value="3">III</option>
+                            <option value="4">IV</option>
+                        </select>
+                        /
+                        <label>*Spaces</label>
+                        <input onkeyup="checkWeaponModalRequirements('update')" id="update-weapon-item-spaces" type="number"/>
+                    </p>
+                    <p>
+                        <label>Description</label>
+                        <textarea id="update-weapon-item-description"></textarea>
+                    </p>
+                    <button id="update-weapon-item-button" onclick="updateItem(1)"> Edit </button>
+                    <button onclick="updateWeaponItemModal.close()"> Cancel </button>
+                </dialog>
+
+                <!--(2) Protection Item Modal-->
+                <dialog id="update-protection-item-modal">
+                    <input id="update-protection-item-id" type="hidden"/>
+                    <h3> Edit Protection Item </h3>
+                    <p>
+                        <label>*Name</label>
+                        <input onkeyup="checkProtectionModalRequirements('update')" id="update-protection-item-name" type="text"/>
+                    </p>
+                    <p>
+                        <label>*Defense</label>
+                        <input onkeyup="checkProtectionModalRequirements('update')" id="update-protection-item-defense" type="number"/>
+                    </p>
+                    <p>
+                        <label>*Category</label>
+                        <select id="update-protection-item-category">
+                            <option value="0">0</option>
+                            <option value="1">I</option>
+                            <option value="2">II</option>
+                            <option value="3">III</option>
+                            <option value="4">IV</option>
+                        </select>
+                        /
+                        <label>*Spaces</label>
+                        <input onkeyup="checkProtectionModalRequirements('update')" id="update-protection-item-spaces" type="number"/>
+                    </p>
+                    <p>
+                        <label>Description</label>
+                        <textarea id="update-protection-item-description"></textarea>
+                    </p>
+                    <button id="update-protection-item-button" onclick="updateItem(2)"> Edit </button>
+                    <button onclick="updateProtectionItemModal.close()"> Cancel </button>
+                </dialog>
+
+                <!--(3) Cursed Item Modal-->
+                <dialog id="update-cursed-item-modal">
+                    <input id="update-cursed-item-id" type="hidden"/>
+                    <h3> Edit Cursed Item </h3>
+                    <p>
+                        <label>*Name</label>
+                        <input onkeyup="checkCursedModalRequirements('update')" id="update-cursed-item-name" type="text"/>
+                    </p>
+                    <label>*Element</label>
+                    <select id="update-cursed-item-element">
+                        <option value="0">Blood</option>
+                        <option value="1">Death</option>
+                        <option value="2">Knowledge</option>
+                        <option value="3">Energy</option>
+                        <option value="4">Fear</option>
+                        <option value="5">Varies</option>
+                    </select>
+                    <p>
+                        <label>*Category</label>
+                        <select id="update-cursed-item-category">
+                            <option value="0">0</option>
+                            <option value="1">I</option>
+                            <option value="2">II</option>
+                            <option value="3">III</option>
+                            <option value="4">IV</option>
+                        </select>
+                        /
+                        <label>*Spaces</label>
+                        <input onkeyup="checkCursedModalRequirements('update')" id="update-cursed-item-spaces" type="number"/>
+                    </p>
+                    <p>
+                        <label>Description</label>
+                        <textarea id="update-cursed-item-description"></textarea>
+                    </p>
+                    <button id="update-cursed-item-button" onclick="updateItem(3)"> Edit </button>
+                    <button onclick="updateCursedItemModal.close()"> Cancel </button>
+                </dialog>
+
+                <!--(4) Ammunition Item Modal-->
+                <dialog id="update-ammunition-item-modal">
+                    <input id="update-ammunition-item-id" type="hidden"/>
+                    <h3> New Ammunition Item </h3>
+                    <p>
+                        <label>*Name</label>
+                        <input onkeyup="checkItemModalRequirements('ammunition', 'update')" id="update-ammunition-item-name" type="text"/>
+                    </p>
+                    <p>
+                        <label>*Category</label>
+                        <select id="update-ammunition-item-category">
+                            <option value="0">0</option>
+                            <option value="1">I</option>
+                            <option value="2">II</option>
+                            <option value="3">III</option>
+                            <option value="4">IV</option>
+                        </select>
+                        /
+                        <label>*Spaces</label>
+                        <input onkeyup="checkItemModalRequirements('ammunition', 'update')" id="update-ammunition-item-spaces" type="number"/>
+                    </p>
+                    <p>
+                        <label>Description</label>
+                        <textarea id="update-ammunition-item-description"></textarea>
+                    </p>
+                    <button id="update-ammunition-item-button" onclick="updateItem(4)"> Edit </button>
+                    <button onclick="updateAmmunitionItemModal.close()"> Cancel </button>
+                </dialog>
+            </div>
+        
+            <h3> Inventory </h3>
+
+            <!-- New items -->
+            <div>
+                <label> New Item: </label>
+                <button onclick="checkWeaponModalRequirements('new'); newWeaponItemModal.showModal()"> Weapon </button>
+                <button onclick="checkItemModalRequirements('ammunition', 'new'); newAmmunitionItemModal.showModal()"> Ammunition </button>
+                <button onclick="checkItemModalRequirements('general', 'new'); newGeneralItemModal.showModal()"> General </button>
+                <button onclick="checkProtectionModalRequirements('new'); newProtectionItemModal.showModal()"> Protection </button>
+                <button onclick="checkCursedModalRequirements('new'); newCursedItemModal.showModal()"> Cursed Item </button>
+            </div>
+
+            <br>
+
+            <!-- Main information -->
+            <div>
+                <div>
+                    <label>Prestige Points</label>
+                    <input class="stats-field" onkeyup="updateCharacter()" id="prestige" type="number" value="{{character.prestige}}"/>
+                    /
+                    <label>Patent</label>
+                    <select onchange="updateCharacter()" id="patent">
+                        <option value="0">Mundane</option>
+                        <option value="1">Recruit</option>
+                        <option value="2">Operator</option>
+                        <option value="3">Special agent</option>
+                        <option value="4">Operations oficial</option>
+                    </select>
+                </div>
+
+                <br>
+
+                <div>
+                    <label>Item limit</label>
+                    <input class="stats-field" onkeyup="updateCharacter()" id="category_limit_1" type="number" value="{{character.category_limit_1}}"/> 
+                    <input class="stats-field" onkeyup="updateCharacter()" id="category_limit_2" type="number" value="{{character.category_limit_2}}"/> 
+                    <input class="stats-field" onkeyup="updateCharacter()" id="category_limit_3" type="number" value="{{character.category_limit_3}}"/>  
+                    <input class="stats-field" onkeyup="updateCharacter()" id="category_limit_4" type="number" value="{{character.category_limit_4}}"/>  
+                </div>
+
+                <div>
+                    <label>On inventory</label>
+                    <input disabled class="stats-field" id="category_items_1" type="number"/>
+                    <input disabled class="stats-field" id="category_items_2" type="number"/>
+                    <input disabled class="stats-field" id="category_items_3" type="number"/>
+                    <input disabled class="stats-field" id="category_items_4" type="number"/> 
+                </div>
+
+                <br>
+
+                <div>
+                    <label>Credit limit</label>
+                    <select onchange="updateCharacter()" id="credit_limit">
+                        <option value="0">Low</option>
+                        <option value="1">Average</option>
+                        <option value="2">High</option>
+                        <option value="3">Unlimited</option>
+                    </select>
+                    /
+                    <label>Max weight</label>
+                    <input class="stats-field" onkeyup="updateCharacter()" id="current_weight" type="number" value="{{character.current_weight}}"/> 
+                    /
+                    <input class="stats-field" onkeyup="updateCharacter()" id="max_weight" type="number" value="{{character.max_weight}}"/> 
+                </div>
+            </div>
+            
+            <hr>
+
+            <!-- Item's List -->
+            <div id="items-list">
+                <!-- Items are added in javascript -->
+            </div>
+
         </div>
         <!-- Description -->
         <div id="description-tab" class="tab-content">
@@ -517,6 +914,8 @@
             </p>
         </div>
     </div>
+    
+    <!-- Chat -->
     <div>
         {% if campaign != None %}
 
@@ -553,7 +952,12 @@ function openPage(pageName, elmnt)
 function updateModalHTML(modal, property, id, input)
 {
     var updatedElement = document.getElementById('update-' + modal + '-' + property);
-    var updatedContent = document.getElementById(modal + '-' + id + '-' + property).innerHTML;
+    
+    try {
+        var updatedContent = document.getElementById(modal + '-' + id + '-' + property).innerHTML;
+    } catch {
+        var updatedContent = "";
+    }
 
     if (updatedContent == null)
         updatedContent = "";
@@ -567,6 +971,19 @@ function updateModalHTML(modal, property, id, input)
     updatedElement.innerHTML = updatedContent;
 }
 
+function checkModalRequirements(property, modal)
+{
+    const button = document.getElementById(modal + '-' + property + '-button');
+
+    if (document.getElementById(modal + '-' + property + '-name').value == "")
+    {    
+        button.disabled = true;
+        return;
+    }
+
+    button.disabled = false;
+}
+
 document.getElementById("default-open").click();
 
 //-----------------------------
@@ -575,7 +992,7 @@ document.getElementById("default-open").click();
 const newAbilityModal = document.getElementById('new-ability-modal');
 const updateAbilityModal = document.getElementById('update-ability-modal');
 
-function addNewAbility(abilitiesElmnt)
+function addNewAbility()
 {
     //console.log("Adding new ability...");
     
@@ -595,9 +1012,24 @@ function addNewAbility(abilitiesElmnt)
         success: function(data) 
         {
             //console.log(data)
-            console.log(abilitiesElmnt);
             if (data != -1)
-                abilitiesElmnt.innerHTML += "<div><b id=\"ability-" + data + "-name\"> " + abilityName + "</b><p id=\"ability-" + data + "-name\">" + abilityDescription + "</p><button onclick=\"deleteAbility('" + data + "', this)\">Delete</button> / <button onclick=\"openAbilityUpdateModal('" + data + "')\">Edit</button><hr></div>"
+            {
+                const abilitiesList = document.getElementById('abilities-list');
+                
+                abilitiesElmnt.innerHTML += `
+                <div>
+                    <b id="ability-` + data + `-name"> ` + abilityName + `</b>
+                    <p id="ability-` + data + `-name">` + abilityDescription + `</p>
+                    <button onclick="deleteAbility('` + data + `', this)">
+                        Delete
+                    </button> 
+                    / 
+                    <button onclick="onkeyup="openUpdateAbilityModal('` + data + `'); checkModalRequirements('ability', 'update')"">
+                        Edit
+                    </button>
+                    <hr>
+                </div>`;
+            }
         }
     });
 
@@ -639,19 +1071,20 @@ function updateAbility()
 {
     //console.log("Deleting ability...");
     
-    var ability = $('#update-ability-id').val();
-    var name = $('#update-ability-name').val();
-    var description = $('#update-ability-description').val();
+    var id = $('#update-ability-id').val();
 
-    $.ajax({
+    const ability = {
+        name: $('#update-ability-name').val(),
+        description: $('#update-ability-description').val()
+    }
+
+    var data = {
         type:'POST',
         url:'{% url 'update-ability' %}',
         data:
         {
             character: {{ character.id }},
-            ability: ability,
-            name: name,
-            description: description,
+            ability: id,
             csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
         },
         success: function(data) 
@@ -661,11 +1094,18 @@ function updateAbility()
             // Update on page html
             if (data != -1)
             {
-                document.getElementById('ability-' + ability + '-name').innerHTML = name;
-                document.getElementById('ability-' + ability + '-description').innerHTML = description;
+                Object.entries(ability).forEach(([k,v]) => {
+                    document.getElementById('ability-' + id + '-' + k).innerHTML = v;
+                });
             }
         }
+    };
+
+    Object.entries(ability).forEach(([k,v]) => {
+        data.data[k] = v;
     });
+
+    $.ajax(data);
 
     updateAbilityModal.close();
 }
@@ -673,31 +1113,32 @@ function updateAbility()
 //-----------------------------
 // Rituals tab
 //-----------------------------
+const ritualsList = document.getElementById('rituals-list');
 const newRitualModal = document.getElementById('new-ritual-modal');
 const updateRitualModal = document.getElementById('update-ritual-modal');
     
 var elements = ['Blood', 'Death', 'Knowledge', 'Energy', 'Fear', 'Varies']
 
-function addNewRitual(ritualElmnt)
+function addNewRitual()
 {
     //console.log("Adding new ritual...");
 
-    var ritualName = $('#new-ritual-name').val();
+    var name = $('#new-ritual-name').val();
 
-    var ritualElement = $('#new-ritual-element').val();
-    var ritualCircle = $('#new-ritual-circle').val();
+    var element = $('#new-ritual-element').val();
+    var circle = $('#new-ritual-circle').val();
 
-    var ritualRange = $('#new-ritual-range').val();
-    var ritualArea = $('#new-ritual-area').val();
-    var ritualDuration = $('#new-ritual-duration').val();
-    var ritualEffect = $('#new-ritual-effect').val();
-    var ritualResistance = $('#new-ritual-resistance').val();
+    var range = $('#new-ritual-range').val();
+    var area = $('#new-ritual-area').val();
+    var duration = $('#new-ritual-duration').val();
+    var effect = $('#new-ritual-effect').val();
+    var resistance = $('#new-ritual-resistance').val();
 
-    var ritualDices = $('#new-ritual-dices').val();
-    var ritualRisenDices = $('#new-ritual-risen-dices').val();
-    var ritualTrueDices = $('#new-ritual-true-dices').val();
+    var dices = $('#new-ritual-dices').val();
+    var risenDices = $('#new-ritual-risen-dices').val();
+    var trueDices = $('#new-ritual-true-dices').val();
     
-    var ritualDescription = $('#new-ritual-description').val();
+    var description = $('#new-ritual-description').val();
 
     $.ajax({
         type:'POST',
@@ -705,118 +1146,34 @@ function addNewRitual(ritualElmnt)
         data:
         {
             character: {{ character.id }},
-            name: ritualName,
+            name: name,
 
-            element: ritualElement,
-            circle: ritualCircle,
+            element: element,
+            circle: circle,
 
-            range: ritualRange,
-            area: ritualArea,
-            duration: ritualDuration,
-            effect: ritualEffect,
-            resistance: ritualResistance,
+            range: range,
+            area: area,
+            duration: duration,
+            effect: effect,
+            resistance: resistance,
 
-            dices: ritualDices,
-            risen_dices: ritualRisenDices,
-            true_dices: ritualTrueDices,
+            dices: dices,
+            risen_dices: risenDices,
+            true_dices: trueDices,
 
-            description: ritualDescription,
+            description: description,
             csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
         },
         success: function(data) 
         {
             //console.log(data)
-            console.log(ritualElmnt);
             if (data != -1)
             {
-                // Header of the ritual
-                ritualElmnt.innerHTML += `
-                <div>
-                    <b id="ritual-` + data + `-name">` + ritualName + `</b>
+                html = ritualHTML(data, name, description, element, circle, range, area, duration, effect, resistance, dices, risenDices, trueDices);
 
-                    <br>
+                ritualsList.innerHTML += html;
 
-                    <p>
-                        <spam id="ritual-` + data + `-element">` + elements[ritualElement] + `</spam> 
-                        /
-                        <spam id="ritual-` + data + `-circle">` + ritualCircle + `</spam>
-                    </p>
-                    
-                    <div>`;
-
-                // Optional elements that the ritual may or may not have
-
-                if (ritualRange != "")
-                    ritualElmnt.innerHTML += `
-                    <div>
-                        <label> Range: </label>
-                        <spam id="ritual-` + data + `}-range">{{ritual.range}}</spam>
-                    </div>`;
-                
-                if (ritualArea != "")
-                    ritualElmnt.innerHTML += `
-                    <div>
-                        <label> Area: </label>
-                        <spam id="ritual-` + data + `-area">{{ritual.area}}</spam>
-                    </div>`;
-                
-                if (ritualDuration != "")
-                    ritualElmnt.innerHTML += `
-                    <div>
-                        <label> Duration: </label>
-                        <spam id="ritual-` + data + `-duration">{{ritual.duration}}</spam>
-                    </div>`;
-
-                if (ritualEffect != "")
-                    ritualElmnt.innerHTML += `
-                    <div>
-                        <label> Effect: </label>
-                        <spam id="ritual-` + data + `-effect">{{ritual.effect}}</spam>
-                    </div>`;
-                    
-                if (ritualResistance != "")
-                    ritualElmnt.innerHTML += `
-                    <div>
-                        <label> Resistance: </label>
-                        <spam id="ritual-` + data + `-resistance">{{ritual.resistance}}</spam>
-                    </div>`;
-                
-                ritualElmnt.innerHTML += `<div>`;
-                    
-                if (ritualDices != "")
-                    ritualElmnt.innerHTML += `
-                    <label> Dices: </label>
-                    <b>
-                        <spam id="ritual-` + data + `-dices">` + ritualDices + `</spam> 
-                    </b>
-                    / `;
-                    
-                if (ritualRisenDices != "")
-                    ritualElmnt.innerHTML += `
-                    <label> Risen Dices: </label>
-                    <b>
-                        <spam id="ritual-` + data + `-risen-dices">` + ritualRisenDices + `</spam>
-                    </b>
-                    /`;
-                    
-                if (ritualTrueDices != "")
-                    ritualElmnt.innerHTML += `
-                    <label> True Dices: </label>
-                    <b>
-                        <spam id="ritual-` + data + `-true-dices">` + ritualTrueDices + `}</spam>
-                    </b>`;
-                    
-
-                // Footer of the ritual
-                ritualElmnt.innerHTML += `</div>
-                    
-                    <p id="ritual-` + data + `-description">` + ritualDescription + `</p>
-
-                    <button onclick="deleteRitual(` + data + `, this)">Delete</button>
-                    /
-                    <button onclick="openUpdateRitualModal('` + data + `')">Edit</button>
-                    <hr>
-                </div>`;
+                sortRituals();
             }
         }
     });
@@ -875,22 +1232,22 @@ function updateRitual()
     
     var ritual = $('#update-ritual-id').val();
 
-    var ritualName = $('#update-ritual-name').val();
+    var name = $('#update-ritual-name').val();
 
-    var ritualElement = $('#update-ritual-element').val();
-    var ritualCircle = $('#update-ritual-circle').val();
+    var element = $('#update-ritual-element').val();
+    var circle = $('#update-ritual-circle').val();
 
-    var ritualRange = $('#update-ritual-range').val();
-    var ritualArea = $('#update-ritual-area').val();
-    var ritualDuration = $('#update-ritual-duration').val();
-    var ritualEffect = $('#update-ritual-effect').val();
-    var ritualResistance = $('#update-ritual-resistance').val();
+    var range = $('#update-ritual-range').val();
+    var area = $('#update-ritual-area').val();
+    var duration = $('#update-ritual-duration').val();
+    var effect = $('#update-ritual-effect').val();
+    var resistance = $('#update-ritual-resistance').val();
 
-    var ritualDices = $('#update-ritual-dices').val();
-    var ritualRisenDices = $('#update-ritual-risen-dices').val();
-    var ritualTrueDices = $('#update-ritual-true-dices').val();
+    var dices = $('#update-ritual-dices').val();
+    var risenDices = $('#update-ritual-risen-dices').val();
+    var trueDices = $('#update-ritual-true-dices').val();
     
-    var ritualDescription = $('#update-ritual-description').val();
+    var description = $('#update-ritual-description').val();
 
     $.ajax({
         type:'POST',
@@ -899,22 +1256,22 @@ function updateRitual()
         {
             character: {{ character.id }},
             ritual: ritual,
-            name: ritualName,
+            name: name,
 
-            element: ritualElement,
-            circle: ritualCircle,
+            element: element,
+            circle: circle,
             
-            range: ritualRange,
-            area: ritualArea,
-            duration: ritualDuration,
-            effect: ritualEffect,
-            resistance: ritualResistance,
+            range: range,
+            area: area,
+            duration: duration,
+            effect: effect,
+            resistance: resistance,
 
-            dices: ritualDices,
-            risen_dices: ritualRisenDices,
-            true_dices: ritualTrueDices,
+            dices: dices,
+            risen_dices: risenDices,
+            true_dices: trueDices,
 
-            description: ritualDescription,
+            description: description,
             csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
         },
         success: function(data) 
@@ -924,28 +1281,1249 @@ function updateRitual()
             // Update on page html
             if (data != -1)
             {
-                document.getElementById('ritual-' + data + '-name').innerHTML = ritualName;
+                // Remove previous not updated item
+                document.getElementById('ritual-' + data + '-name').parentElement.remove();
 
-                document.getElementById('ritual-' + data + '-element').innerHTML = elements[ritualElement];
-                document.getElementById('ritual-' + data + '-circle').innerHTML = ritualCircle;
-
-                document.getElementById('ritual-' + data + '-range').innerHTML = ritualRange;
-                document.getElementById('ritual-' + data + '-area').innerHTML = ritualArea;
-                document.getElementById('ritual-' + data + '-duration').innerHTML = ritualDuration;
-                document.getElementById('ritual-' + data + '-effect').innerHTML = ritualEffect;
-                document.getElementById('ritual-' + data + '-resistance').innerHTML = ritualResistance;
+                // Add new updated item
+                ritualsList.innerHTML += ritualHTML(data, name, description, element, circle, range, area, duration, effect, resistance, dices, risenDices, trueDices);
             
-                document.getElementById('ritual-' + data + '-dices').innerHTML = ritualDices;
-                document.getElementById('ritual-' + data + '-risen-dices').innerHTML = ritualRisenDices;
-                document.getElementById('ritual-' + data + '-true-dices').innerHTML = ritualTrueDices;
-
-                document.getElementById('ritual-' + data + '-description').innerHTML = ritualDescription;
+                sortRituals();
             }
         }
     });
 
     updateRitualModal.close();
 }
+
+
+// Others
+function sortRituals()
+{
+    const rituals = Array.from(ritualsList.querySelectorAll("#ritual"));
+
+    const sortedRituals = rituals.sort((a, b) => {
+        const aText = a.querySelector('b.ritual-name').textContent.trim();
+        const bText = b.querySelector('b.ritual-name').textContent.trim();
+    
+        return aText > bText ? 1 : -1;
+    });
+
+    ritualsList.innerHTML = "";
+
+    ritualsList.append(...sortedRituals);
+}
+
+//-----------------------------
+// Inventory tab
+//-----------------------------
+const itemsList = document.getElementById('items-list');
+
+const newGeneralItemModal = document.getElementById('new-general-item-modal');
+const newWeaponItemModal = document.getElementById('new-weapon-item-modal');
+const newProtectionItemModal = document.getElementById('new-protection-item-modal');
+const newCursedItemModal = document.getElementById('new-cursed-item-modal');
+const newAmmunitionItemModal = document.getElementById('new-ammunition-item-modal');
+
+const updateGeneralItemModal = document.getElementById('update-general-item-modal');
+const updateWeaponItemModal = document.getElementById('update-weapon-item-modal');
+const updateProtectionItemModal = document.getElementById('update-protection-item-modal');
+const updateCursedItemModal = document.getElementById('update-cursed-item-modal');
+const updateAmmunitionItemModal = document.getElementById('update-ammunition-item-modal');
+
+
+// Add items
+
+function addNewItem(itemType)
+{
+    //console.log("Adding new ritual...");
+
+    switch(itemType)
+    {
+        case 0:
+            addGeneralItem();
+            break;
+
+        case 1:
+            addWeaponItem();
+            break;
+
+        case 2:
+            addProtectionItem();
+            break;
+
+        case 3:
+            addCursedItem();
+            break;
+
+        case 4:
+            addAmmunitionItem();
+            break;
+    }
+}
+
+function addGeneralItem()
+{
+    console.log("Adding general item...");
+    
+    var name = $('#new-general-item-name').val();    
+    var category = $('#new-general-item-category').val();
+    var spaces = $('#new-general-item-spaces').val();
+    var description = $('#new-general-item-description').val();
+
+    var tag = $('#new-general-item-tag').val();
+
+    $.ajax({
+        type:'POST',
+        url:'{% url 'add-item' %}',
+        data:
+        {
+            character: {{ character.id }},
+            item_type: 0,
+            
+            name: name,
+            category: category,
+            spaces: spaces,
+            description: description,
+
+            tag: tag,
+
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) 
+        {
+            console.log(data)
+            if (data != -1)
+            {
+                // Add item to inventory
+                itemsList.innerHTML += generalItemHTML(data, name, description, spaces, category, tag);
+
+                if (category != 0)
+                {
+                    const categoryItem = document.getElementById("category_items_" + category);
+
+                    categoryItem.value = parseInt(categoryItem.value) + 1;
+                }
+
+                // Sort inventory
+                sortInventory();
+            }
+        }
+    });
+
+    newGeneralItemModal.close();
+}
+
+function addWeaponItem()
+{
+    console.log("Adding weapon item...");
+    
+    var name = $('#new-weapon-item-name').val();    
+    var category = $('#new-weapon-item-category').val();
+    var spaces = $('#new-weapon-item-spaces').val();
+    var description = $('#new-weapon-item-description').val();
+
+    var proficiency = $('#new-weapon-item-proficiency').val();
+    var weaponType = $('#new-weapon-item-type').val();
+    var gripType = $('#new-weapon-item-grip-type').val();
+
+    var damage = $('#new-weapon-item-damage').val();
+    var secondaryDamage = $('#new-weapon-item-secondary-damage').val();
+    var critical = $('#new-weapon-item-critical').val();
+    var multiplier = $('#new-weapon-item-multiplier').val();
+    
+    var damageType = $('#new-weapon-item-damage-type').val();
+    var range = $('#new-weapon-item-range').val();
+
+    $.ajax({
+        type:'POST',
+        url:'{% url 'add-item' %}',
+        data:
+        {
+            character: {{ character.id }},
+            item_type: 1,
+            
+            name: name,
+            category: category,
+            spaces: spaces,
+            description: description,
+
+            proficiency: proficiency,
+            weapon_type: weaponType,
+            grip_type: gripType,
+
+            damage: damage,
+            secondary_damage: secondaryDamage,
+            critical: critical,
+            multiplier: multiplier,
+
+            damage_type: damageType,
+            range: range,
+
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) 
+        {
+            console.log(data)
+            if (data != -1)
+            {
+                // Add item to inventory
+                itemsList.innerHTML += weaponItemHTML(data, name, description, spaces, category, proficiency, weaponType, gripType, damage, secondaryDamage, critical, multiplier, damageType, range);
+
+                if (category != 0)
+                {
+                    const categoryItem = document.getElementById("category_items_" + category);
+
+                    categoryItem.value = parseInt(categoryItem.value) + 1;
+                }
+
+                // Sort inventory
+                sortInventory();
+            }
+        }
+    });
+
+    newWeaponItemModal.close();
+}
+
+function addProtectionItem()
+{
+    console.log("Adding protection item...");
+    
+    var name = $('#new-protection-item-name').val();    
+    var category = $('#new-protection-item-category').val();
+    var spaces = $('#new-protection-item-spaces').val();
+    var description = $('#new-protection-item-description').val();
+
+    var defense = $('#new-protection-item-defense').val();
+
+    $.ajax({
+        type:'POST',
+        url:'{% url 'add-item' %}',
+        data:
+        {
+            character: {{ character.id }},
+            item_type: 2,
+            
+            name: name,
+            category: category,
+            spaces: spaces,
+            description: description,
+
+            defense: defense,
+
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) 
+        {
+            console.log(data)
+            if (data != -1)
+            {
+                // Add item to inventory
+                itemsList.innerHTML += protectionItemHTML(data, name, description, spaces, category, defense);
+
+                if (category != 0)
+                {
+                    const categoryItem = document.getElementById("category_items_" + category);
+
+                    categoryItem.value = parseInt(categoryItem.value) + 1;
+                }
+
+                // Sort inventory
+                sortInventory();
+            }
+        }
+    });
+
+    newProtectionItemModal.close();
+}
+
+function addCursedItem()
+{
+    console.log("Adding cursed item...");
+    
+    var name = $('#new-cursed-item-name').val();    
+    var category = $('#new-cursed-item-category').val();
+    var spaces = $('#new-cursed-item-spaces').val();
+    var description = $('#new-cursed-item-description').val();
+
+    var element = $('#new-cursed-item-element').val();
+
+    $.ajax({
+        type:'POST',
+        url:'{% url 'add-item' %}',
+        data:
+        {
+            character: {{ character.id }},
+            item_type: 3,
+            
+            name: name,
+            category: category,
+            spaces: spaces,
+            description: description,
+
+            element: element,
+
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) 
+        {
+            console.log(data)
+            if (data != -1)
+            {
+                // Add item to inventory
+                itemsList.innerHTML += cursedItemHTML(data, name, description, spaces, category, element);
+
+                if (category != 0)
+                {
+                    const categoryItem = document.getElementById("category_items_" + category);
+
+                    categoryItem.value = parseInt(categoryItem.value) + 1;
+                }
+
+                // Sort inventory
+                sortInventory();
+            }
+        }
+    });
+
+    newCursedItemModal.close();
+}
+
+function addAmmunitionItem()
+{
+    console.log("Adding ammunition item...");
+    
+    var name = $('#new-ammunition-item-name').val();    
+    var category = $('#new-ammunition-item-category').val();
+    var spaces = $('#new-ammunition-item-spaces').val();
+    var description = $('#new-ammunition-item-description').val();
+
+    var element = $('#new-ammunition-item-element').val();
+
+    $.ajax({
+        type:'POST',
+        url:'{% url 'add-item' %}',
+        data:
+        {
+            character: {{ character.id }},
+            item_type: 0,
+            
+            name: name,
+            category: category,
+            spaces: spaces,
+            description: description,
+
+            tag: 4,
+
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) 
+        {
+            console.log(data)
+            if (data != -1)
+            {
+                // Add item to inventory
+                itemsList.innerHTML += ammunitionItemHTML(data, name, description, spaces, category);
+
+                if (category != 0)
+                {
+                    const categoryItem = document.getElementById("category_items_" + category);
+
+                    categoryItem.value = parseInt(categoryItem.value) + 1;
+                }
+
+                // Sort inventory
+                sortInventory();
+            }
+        }
+    });
+
+    newAmmunitionItemModal.close();
+}
+
+// Delete items
+function deleteItem(itemType, item, itemElmnt)
+{
+    console.log("Deleting item...");
+    
+    $.ajax({
+        type:'POST',
+        url:'{% url 'delete-item' %}',
+        data:
+        {
+            character: {{ character.id }},
+            item_type: itemType,
+            item: item,
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) 
+        {
+            //console.log(data)
+            if (data != -1)
+                itemElmnt.parentElement.remove();
+        }
+    });
+}
+
+
+// Open updated models
+function openUpdateGeneralItemModal(item)
+{
+    updateGeneralItemModal.showModal();
+
+    document.getElementById('update-general-item-id').value = item;
+    updateModalHTML('general-item', 'name', item, true);
+    updateModalHTML('general-item', 'category', item, true);
+    updateModalHTML('general-item', 'spaces', item, true);
+    updateModalHTML('general-item', 'tag', item, true);
+    updateModalHTML('general-item', 'description', item, false);
+}
+
+function openUpdateWeaponItemModal(item)
+{
+    updateWeaponItemModal.showModal();
+
+    document.getElementById('update-weapon-item-id').value = item;
+    updateModalHTML('weapon-item', 'name', item, true);
+    updateModalHTML('weapon-item', 'category', item, true);
+    updateModalHTML('weapon-item', 'spaces', item, true);
+    updateModalHTML('weapon-item', 'description', item, false);
+
+    updateModalHTML('weapon-item', 'proficiency', item, true);
+    updateModalHTML('weapon-item', 'type', item, true);
+    updateModalHTML('weapon-item', 'grip-type', item, true);
+    updateModalHTML('weapon-item', 'damage', item, true);
+    updateModalHTML('weapon-item', 'secondary-damage', item, true);
+    updateModalHTML('weapon-item', 'critical', item, true);
+    updateModalHTML('weapon-item', 'multiplier', item, true);
+    updateModalHTML('weapon-item', 'damage-type', item, true);
+    updateModalHTML('weapon-item', 'range', item, true);
+}
+
+function openUpdateProtectionItemModal(item)
+{
+    updateProtectionItemModal.showModal();
+
+    document.getElementById('update-protection-item-id').value = item;
+    updateModalHTML('protection-item', 'name', item, true);
+    updateModalHTML('protection-item', 'category', item, true);
+    updateModalHTML('protection-item', 'spaces', item, true);
+    updateModalHTML('protection-item', 'defense', item, true);
+    updateModalHTML('protection-item', 'description', item, false);
+}
+
+function openUpdateCursedItemModal(item)
+{
+    updateCursedItemModal.showModal();
+
+    document.getElementById('update-cursed-item-id').value = item;
+    updateModalHTML('cursed-item', 'name', item, true);
+    updateModalHTML('cursed-item', 'category', item, true);
+    updateModalHTML('cursed-item', 'spaces', item, true);
+    document.getElementById('update-cursed-item-element').value = elements.indexOf(document.getElementById('cursed-item-' + item + '-element').innerHTML);
+    updateModalHTML('cursed-item', 'description', item, false);
+}
+
+function openUpdateCursedItemModal(item)
+{
+    updateCursedItemModal.showModal();
+
+    document.getElementById('update-ammunition-item-id').value = item;
+    updateModalHTML('ammunition-item', 'name', item, true);
+    updateModalHTML('ammunition-item', 'category', item, true);
+    updateModalHTML('ammunition-item', 'spaces', item, true);
+    updateModalHTML('ammunition-item', 'description', item, false);
+}
+
+// Update items
+function updateItem(itemType)
+{
+    switch(itemType)
+    {
+        case 0:
+            updateGeneralItem();
+            break;
+
+        case 1:
+            updateWeaponItem();
+            break;
+
+        case 2:
+            updateProtectionItem();
+            break;
+
+        case 3:
+            updateCursedItem();
+            break;
+
+        case 4:
+            updateAmmunitionItem();
+            break;
+    }
+}
+
+function updateGeneralItem()
+{    
+    var id = $('#update-general-item-id').val();
+    
+    var name = $('#update-general-item-name').val();    
+    var category = $('#update-general-item-category').val();
+    var spaces = $('#update-general-item-spaces').val();
+    var description = $('#update-general-item-description').val();
+
+    var tag = $('#update-general-item-tag').val();
+
+    $.ajax({
+        type:'POST',
+        url:'{% url 'update-item' %}',
+        data:
+        {
+            character: {{ character.id }},
+            item_type: 0,
+            item: id,
+            
+            name: name,
+            category: category,
+            spaces: spaces,
+            description: description,
+
+            tag: tag,
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) 
+        {
+            console.log(data)
+
+            // Update on page html
+            if (data != -1)
+            {
+                document.getElementById('general-item-' + data + '-name').innerHTML = name;
+                document.getElementById('general-item-' + data + '-category').innerHTML = category;
+                document.getElementById('general-item-' + data + '-spaces').innerHTML = spaces;
+                document.getElementById('general-item-' + data + '-description').innerHTML = description;
+
+                document.getElementById('general-item-' + data + '-tag').innerHTML = tag;
+
+                sortInventory();
+            }
+        }
+    });
+
+    updateGeneralItemModal.close();
+}
+
+function updateWeaponItem()
+{
+    var id = $('#update-weapon-item-id').val();
+
+    var name = $('#update-weapon-item-name').val();    
+    var category = $('#update-weapon-item-category').val();
+    var spaces = $('#update-weapon-item-spaces').val();
+    var description = $('#update-weapon-item-description').val();
+
+    var proficiency = $('#update-weapon-item-proficiency').val();
+    var weaponType = $('#update-weapon-item-type').val();
+    var gripType = $('#update-weapon-item-grip-type').val();
+
+    var damage = $('#update-weapon-item-damage').val();
+    var secondaryDamage = $('#update-weapon-item-secondary-damage').val();
+    var critical = $('#update-weapon-item-critical').val();
+    var multiplier = $('#update-weapon-item-multiplier').val();
+    
+    var damageType = $('#update-weapon-item-damage-type').val();
+    var range = $('#update-weapon-item-range').val();
+
+    $.ajax({
+        type:'POST',
+        url:'{% url 'update-item' %}',
+        data:
+        {
+            character: {{ character.id }},
+            item_type: 1,
+            item: id,
+            
+            name: name,
+            category: category,
+            spaces: spaces,
+            description: description,
+
+            proficiency: proficiency,
+            weapon_type: weaponType,
+            grip_type: gripType,
+
+            damage: damage,
+            secondary_damage: secondaryDamage,
+            critical: critical,
+            multiplier: multiplier,
+
+            damage_type: damageType,
+            range: range,
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) 
+        {
+            console.log(data)
+
+            // Update on page html
+            if (data != -1)
+            {
+                // Remove previous not updated item
+                document.getElementById('weapon-item-' + id + '-name').parentElement.parentElement.remove();
+
+                // Add item to inventory
+                itemsList.innerHTML += weaponItemHTML(data, name, description, spaces, category, proficiency, weaponType, gripType, damage, secondaryDamage, critical, multiplier, damageType, range);
+                
+                sortInventory();
+            }
+        }
+    });
+
+    updateWeaponItemModal.close();
+}
+
+function updateProtectionItem()
+{    
+    var id = $('#update-protection-item-id').val();
+    
+    var name = $('#update-protection-item-name').val();    
+    var category = $('#update-protection-item-category').val();
+    var spaces = $('#update-protection-item-spaces').val();
+    var description = $('#update-protection-item-description').val();
+
+    var defense = $('#update-protection-item-defense').val();
+
+    $.ajax({
+        type:'POST',
+        url:'{% url 'update-item' %}',
+        data:
+        {
+            character: {{ character.id }},
+            item_type: 2,
+            item: id,
+            
+            name: name,
+            category: category,
+            spaces: spaces,
+            description: description,
+
+            defense: defense,
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) 
+        {
+            console.log(data)
+
+            // Update on page html
+            if (data != -1)
+            {
+                document.getElementById('protection-item-' + data + '-name').innerHTML = name;
+                document.getElementById('protection-item-' + data + '-category').innerHTML = category;
+                document.getElementById('protection-item-' + data + '-spaces').innerHTML = spaces;
+                document.getElementById('protection-item-' + data + '-description').innerHTML = description;
+
+                document.getElementById('protection-item-' + data + '-defense').innerHTML = defense;
+
+                sortInventory();
+            }
+        }
+    });
+
+    updateProtectionItemModal.close();
+}
+
+function updateCursedItem()
+{    
+    var id = $('#update-cursed-item-id').val();
+    
+    var name = $('#update-cursed-item-name').val();    
+    var category = $('#update-cursed-item-category').val();
+    var spaces = $('#update-cursed-item-spaces').val();
+    var description = $('#update-cursed-item-description').val();
+
+    var element = $('#update-cursed-item-element').val();
+
+    $.ajax({
+        type:'POST',
+        url:'{% url 'update-item' %}',
+        data:
+        {
+            character: {{ character.id }},
+            item_type: 3,
+            item: id,
+            
+            name: name,
+            category: category,
+            spaces: spaces,
+            description: description,
+
+            element: element,
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) 
+        {
+            console.log(data)
+
+            // Update on page html
+            if (data != -1)
+            {
+                document.getElementById('cursed-item-' + data + '-name').innerHTML = name;
+                document.getElementById('cursed-item-' + data + '-category').innerHTML = category;
+                document.getElementById('cursed-item-' + data + '-spaces').innerHTML = spaces;
+                document.getElementById('cursed-item-' + data + '-description').innerHTML = description;
+
+                document.getElementById('cursed-item-' + data + '-element').innerHTML = elements[element];
+
+                sortInventory();
+            }
+        }
+    });
+
+    updateCursedItemModal.close();
+}
+
+function updateAmmunitionItem()
+{    
+    var id = $('#update-ammunition-item-id').val();
+    
+    var name = $('#update-ammunition-item-name').val();    
+    var category = $('#update-ammunition-item-category').val();
+    var spaces = $('#update-ammunition-item-spaces').val();
+    var description = $('#update-ammunition-item-description').val();
+
+    var element = $('#update-ammunition-item-element').val();
+
+    $.ajax({
+        type:'POST',
+        url:'{% url 'update-item' %}',
+        data:
+        {
+            character: {{ character.id }},
+            item_type: 4,
+            item: id,
+            
+            name: name,
+            category: category,
+            spaces: spaces,
+            description: description,
+
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) 
+        {
+            console.log(data)
+
+            // Update on page html
+            if (data != -1)
+            {
+                document.getElementById('ammunition-item-' + data + '-name').innerHTML = name;
+                document.getElementById('ammunition-item-' + data + '-category').innerHTML = category;
+                document.getElementById('ammunition-item-' + data + '-spaces').innerHTML = spaces;
+                document.getElementById('ammunition-item-' + data + '-description').innerHTML = description;
+
+                document.getElementById('ammunition-item-' + data + '-element').innerHTML = elements[element];
+
+                sortInventory();
+            }
+        }
+    });
+
+    updateAmmunitionItemModal.close();
+}
+
+// Others
+function sortInventory()
+{
+    const items = Array.from(itemsList.querySelectorAll("#item"));
+
+    const sortedItems = items.sort((a, b) => {
+        const aText = a.querySelector('b.item-name').textContent.trim();
+        const bText = b.querySelector('b.item-name').textContent.trim();
+    
+        return aText > bText ? 1 : -1;
+    });
+
+    itemsList.innerHTML = "";
+
+    itemsList.append(...sortedItems);
+}
+
+// "checkModalRequirements" for both the general items and cursed items
+function checkItemModalRequirements(property, modal)
+{
+    const button = document.getElementById(modal + '-' + property + '-item-button');
+
+    if (document.getElementById(modal + '-' + property + '-item-name').value == "" ||
+        document.getElementById(modal + '-' + property + '-item-spaces').value == "")
+    {    
+        button.disabled = true;
+        return;
+    }
+
+    button.disabled = false;
+}
+
+function checkWeaponModalRequirements(modal)
+{
+    const button = document.getElementById(modal + '-weapon-item-button');
+
+    if (document.getElementById(modal + '-weapon-item-name').value == "" ||
+        document.getElementById(modal + '-weapon-item-spaces').value == "" ||
+        document.getElementById(modal + '-weapon-item-damage').value == "" ||
+        document.getElementById(modal + '-weapon-item-critical').value == "" ||
+        document.getElementById(modal + '-weapon-item-multiplier').value == "")
+    {    
+        button.disabled = true;
+        return;
+    }
+
+    button.disabled = false;
+}
+
+function checkProtectionModalRequirements(modal)
+{
+    const button = document.getElementById(modal + '-protection-item-button');
+
+    if (document.getElementById(modal + '-protection-item-name').value == "" ||
+        document.getElementById(modal + '-protection-item-spaces').value == "" ||
+        document.getElementById(modal + '-protection-item-defense').value == "")
+    {    
+        button.disabled = true;
+        return;
+    }
+
+    button.disabled = false;
+}
+
+function checkCursedModalRequirements(modal)
+{
+    const button = document.getElementById(modal + '-cursed-item-button');
+
+    if (document.getElementById(modal + '-cursed-item-name').value == "" ||
+        document.getElementById(modal + '-cursed-item-spaces').value == "" ||
+        document.getElementById(modal + '-cursed-item-element').value == "")
+    {    
+        button.disabled = true;
+        return;
+    }
+
+    button.disabled = false;
+}
+
+//-----------------------------
+// HTML Generator
+//-----------------------------
+
+function ritualHTML(id, name, description, element, circle, range, area, duration, effect, resistance, dices, risenDices, trueDices)
+{
+    // Header of the ritual                
+    var html = `
+    <div id="ritual">
+        <b id="ritual-` + id + `-name" class="ritual-name">` + name + `</b>
+
+        <br>
+
+        <p>
+            <spam id="ritual-` + id + `-element">` + elements[element] + `</spam> 
+            /
+            <spam id="ritual-` + id + `-circle">` + circle + `</spam>
+        </p>
+        
+        <div>`;
+
+    // Optional elements that the ritual may or may not have
+
+    if (range != "")
+        html += `
+        <div>
+            <label> Range: </label>
+            <spam id="ritual-` + id + `-range">` + range + `</spam>
+        </div>`;
+    
+    if (area != "")
+        html += `
+        <div>
+            <label> Area: </label>
+            <spam id="ritual-` + id + `-area">` + area + `</spam>
+        </div>`;
+    
+    if (duration != "")
+        html += `
+        <div>
+            <label> Duration: </label>
+            <spam id="ritual-` + id + `-duration">` + duration + `</spam>
+        </div>`;
+
+    if (effect != "")
+        html += `
+        <div>
+            <label> Effect: </label>
+            <spam id="ritual-` + id + `-effect">` + effect + `</spam>
+        </div>`;
+        
+    if (resistance != "")
+        html += `
+        <div>
+            <label> Resistance: </label>
+            <spam id="ritual-` + id + `-resistance">` + resistance + `</spam>
+        </div>`;
+    
+    html.innerHTML += `<div>`;
+        
+    if (dices != "")
+        html += `
+        <label> Dices: </label>
+        <b>
+            <spam id="ritual-` + id + `-dices">` + dices + `</spam> 
+        </b>
+        / `;
+        
+    if (risenDices != "")
+        html += `
+        <label> Risen Dices: </label>
+        <b>
+            <spam id="ritual-` + id + `-risen-dices">` + risenDices + `</spam>
+        </b>
+        /`;
+        
+    if (trueDices != "")
+        html += `
+        <label> True Dices: </label>
+        <b>
+            <spam id="ritual-` + id + `-true-dices">` + trueDices + `</spam>
+        </b>`;
+        
+
+    // Footer of the ritual
+    html += `</div>
+        
+        <p id="ritual-` + id + `-description">` + description + `</p>
+
+        <button onclick="deleteRitual(` + id + `, this)">Delete</button>
+        /
+        <button onclick="openUpdateRitualModal('` + id + `')">Edit</button>
+        <hr>
+    </div>`;
+
+    return html;
+}
+
+function generalItemHTML(id, name, description, spaces, category, tag)
+{
+    return `
+        <div id="item">
+            <p>
+                <b id="general-item-` + id + `-name" class="item-name">` + name + `</b>
+            </p>
+
+            <small id="general-item-` + id + `-tag">` + tag + `</small>
+
+            <div>
+                <label> Category: </label>
+                <spam id="general-item-` + id + `-category">` + category + `</spam>
+                /
+                <label> Spaces: </label>
+                <spam id="general-item-` + id + `-spaces">` + spaces + `</spam>
+            </div>
+
+            <p id="general-item-` + id + `-description">` + description + `</p>
+
+            <button onclick="deleteItem(0, '` + id + `', this)">Delete</button>
+            /
+            <button onclick="openUpdateGeneralItemModal('` + id + `'); checkItemModalRequirements('general', 'update')">Edit</button>
+            <hr>
+        </div>`;
+}
+
+function weaponItemHTML(id, name, description, spaces, category, proficiency, type, gripType, damage, secondaryDamage, critical, multiplier, damageType, range)
+{
+    var html = `
+    <div id="item">
+        <div>
+            <b id="weapon-item-` + id + `-name" class="item-name">` + name + `</b>
+        </div>`;
+
+    if (proficiency != "")
+        html += `
+        <div>
+            <label>Proficiency: </label>
+            <spam id="weapon-item-` + id + `-proficiency">` + proficiency + `</spam>
+        </div>`;
+
+    if (type != "")
+        html += `
+        <div>
+            <label>Weapon Type: </label>
+            <spam id="weapon-item-` + id + `-type">` + type + `</spam>
+        </div>`;
+
+    if (gripType != "")
+        html += `
+        <div>
+            <label>Grip Type: </label>
+            <spam id="weapon-item-` + id + `-grip-type">` + gripType + `</spam>
+        </div>`;
+    
+    html += `
+        <br>
+        <div>
+            <spam id="weapon-item-` + id + `-damage">` + damage + `</spam>
+        `;
+
+    if (secondaryDamage != "")
+        html += `
+        / <spam id="weapon-item-` + id + `-secondary-damage">` + secondaryDamage + `</spam>
+        `;
+        
+    if (damageType != "")
+        html += `
+        <div>
+            <label>Type: </label>
+            <spam id="weapon-item-` + id + `-damage-type">` + damageType + `</spam>
+        </div>`;
+
+    if (range != "")
+        html += `
+        <div>
+            <label>Range: </label>
+            <spam id="weapon-item-` + id + `-range">` + range + `</spam>
+        </div>`;
+
+    html += `
+            <spam id="weapon-item-` + id + `-critical">` + critical + `</spam>
+            (<spam id="weapon-item-` + id + `-multiplier">` + multiplier + `</spam>)
+        </div>`;
+
+    html += `
+        <div>
+            <label> Category: </label>
+            <spam id="weapon-item-` + id + `-category">` + category + `</spam>
+            /
+            <label> Spaces: </label>
+            <spam id="weapon-item-` + id + `-spaces">` + spaces + `</spam>
+        </div>
+
+        <p id="weapon-item-` + id + `-description">` + description + `</p>
+
+        <button onclick="deleteItem(1, '` + id + `', this)">Delete</button>
+        /
+        <button onclick="openUpdateWeaponItemModal('` + id + `'); checkWeaponModalRequirements('update')">Edit</button>
+        <hr>
+    </div>`;
+
+    return html;
+}
+
+function protectionItemHTML(id, name, description, spaces, category, defense)
+{
+    return `
+        <div id="item">
+            <p>
+                <b id="protection-item-` + id + `-name" class="item-name">` + name + `</b>
+            </p>
+
+            <div>
+                <label>Defense: </label>
+                <spam id="protection-item-` + id + `-defense">` + defense + `</spam>
+            </div>
+
+            <div>
+                <label> Category: </label>
+                <spam id="protection-item-` + id + `-category">` + category + `</spam>
+                /
+                <label> Spaces: </label>
+                <spam id="protection-item-` + id + `-spaces">` + spaces + `</spam>
+            </div>
+
+            <p id="protection-item-` + id + `-description">` + description + `</p>
+
+            <button onclick="deleteItem(2, '` + id + `', this)">Delete</button>
+            /
+            <button onclick="openUpdateProtectionItemModal('` + id + `'); checkProtectionModalRequirements('update')">Edit</button>
+            <hr>
+        </div>`;
+}
+
+function cursedItemHTML(id, name, description, spaces, category, element)
+{
+    return `
+        <div id="item">
+            <p>
+                <b id="cursed-item-` + id + `-name" class="item-name">` + name + `</b>
+            </p>
+
+            <div>
+                <label>Element: </label>
+                <spam id="cursed-item-` + id + `-element">` + elements[element] + `</spam>
+            </div>
+
+            <div>
+                <label> Category: </label>
+                <spam id="cursed-item-` + id + `-category">` + category + `</spam>
+                /
+                <label> Spaces: </label>
+                <spam id="cursed-item-` + id + `-spaces">` + spaces + `</spam>
+            </div>
+
+            <p id="cursed-item-` + id + `-description">` + description + `</p>
+
+            <button onclick="deleteItem(3, '` + id + `', this)">Delete</button>
+            /
+            <button onclick="openUpdateCursedItemModal('` + id + `'); checkCursedModalRequirements('update')">Edit</button>
+            <hr>
+        </div>`;
+}
+
+function ammunitionItemHTML(id, name, description, spaces, category)
+{
+    return `
+        <div id="item">
+            <p>
+                <b id="ammunition-item-` + id + `-name" class="item-name">` + name + `</b>
+            </p>
+
+            <div>
+                <label> Category: </label>
+                <spam id="ammunition-item-` + id + `-category">` + category + `</spam>
+                /
+                <label> Spaces: </label>
+                <spam id="ammunition-item-` + id + `-spaces">` + spaces + `</spam>
+            </div>
+
+            <p id="ammunition-item-` + id + `-description">` + description + `</p>
+
+            <button onclick="deleteItem(0, '` + id + `', this)">Delete</button>
+            /
+            <button onclick="openUpdateAmmunitionItemModal('` + id + `'); checkItemModalRequirements('ammunition', 'update')">Edit</button>
+            <hr>
+        </div>`;
+}
+
+function generateDataObjects()
+{   
+    // Rituals
+    {% for ritual in rituals %}
+
+    ritualsList.innerHTML += ritualHTML(
+        {{ ritual.id }}, 
+        "{{ ritual.name }}", 
+        "{{ ritual.description }}", 
+        {{ ritual.element }}, 
+        {{ ritual.circle }}, 
+        "{{ ritual.range }}", 
+        "{{ ritual.area }}", 
+        "{{ ritual.duration }}", 
+        "{{ ritual.effect }}", 
+        "{{ ritual.resistance }}", 
+        "{{ ritual.dices }}", 
+        "{{ ritual.risen_dices }}", 
+        "{{ ritual.true_dices }}"
+    );
+
+    {% endfor %}
+
+    var categoryItems = new Array(0, 0, 0, 0, 0);
+
+    // General Items
+    {% for item in general_items %}
+    
+    {% if item.tag != 4 %}
+
+    itemsList.innerHTML += generalItemHTML(
+        {{ item.id }},
+        "{{ item.name }}",
+        "{{ item.description }}",
+        {{ item.spaces }},
+        {{ item.category }},
+        {{ item.tag }}
+    );
+
+    {% else %}
+
+    itemsList.innerHTML += ammunitionItemHTML(
+        {{ item.id }},
+        "{{ item.name }}",
+        "{{ item.description }}",
+        {{ item.spaces }},
+        {{ item.category }}
+    );
+
+    {% endif %}
+
+    categoryItems[{{ item.category }}] += 1;
+
+    {% endfor %}
+
+    // Weapon Items
+    {% for item in weapon_items %}
+    
+    itemsList.innerHTML += weaponItemHTML(
+        {{ item.id }},
+        "{{ item.name }}",
+        "{{ item.description }}",
+        {{ item.spaces }},
+        {{ item.category }},
+        "{{ item.proficiency }}",
+        "{{ item.weapon_type }}",
+        "{{ item.grip_type }}",
+        "{{ item.damage }}",
+        "{{ item.secondary_damage }}",
+        {{ item.critical }},
+        {{ item.multiplier }},
+        "{{ damageType }}",
+        "{{ range }}"
+    )
+
+    categoryItems[{{ item.category }}] += 1;
+
+    {% endfor %}
+
+    // Protection Items
+    {% for item in protection_items %}
+    
+    itemsList.innerHTML += protectionItemHTML(
+        {{ item.id }},
+        "{{ item.name }}",
+        "{{ item.description }}",
+        {{ item.spaces }},
+        {{ item.category }},
+        {{ item.defense }}
+    );
+
+    categoryItems[{{ item.category }}] += 1;
+
+    {% endfor %}
+
+    // Cursed Items
+    {% for item in cursed_items %}
+    
+    itemsList.innerHTML += cursedItemHTML(
+        {{ item.id }},
+        "{{ item.name }}",
+        "{{ item.description }}",
+        {{ item.spaces }},
+        {{ item.category }},
+        {{ item.element }}
+    );
+
+    categoryItems[{{ item.category }}] += 1;
+
+    {% endfor %}
+
+
+    // Total category value of the items on inventory
+    document.getElementById('category_items_1').value = categoryItems[1];
+    document.getElementById('category_items_2').value = categoryItems[2];
+    document.getElementById('category_items_3').value = categoryItems[3];
+    document.getElementById('category_items_4').value = categoryItems[4];
+
+
+    document.getElementById('patent').value = {{ character.patent }};
+    document.getElementById('credit_limit').value = {{ character.credit_limit }};
+}
+
+generateDataObjects();
+sortInventory();
+sortRituals();
 
 //-----------------------------
 // Dice rolls
@@ -961,8 +2539,8 @@ function showDicePopup(text)
         timer: 10000,
         timerProgressBar: true,
         didOpen: (toast) => {
-          toast.onmouseenter = Swal.stopTimer;
-          toast.onmouseleave = Swal.resumeTimer;
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
         }
     });
 
@@ -1026,8 +2604,7 @@ function rollSkill(skill)
 //-----------------------------
 // Character Sheet Update
 //-----------------------------
-
-function updateCharacter() 
+function updateCharacter(url)
 {
     //console.log("Updating character");
     document.getElementById('defense').innerHTML = 10 + parseInt($('#equipment_defense').val()) + parseInt($('#other_defense').val());
@@ -1067,6 +2644,18 @@ function updateCharacter()
             resistance:$('#resistance').val(),
             proficiency:$('#proficiency').val(),
 
+            prestige:$('#prestige').val(),
+            patent:$('#patent').val(),
+            
+            category_limit_1:$('#category_limit_1').val(),
+            category_limit_2:$('#category_limit_2').val(),
+            category_limit_3:$('#category_limit_3').val(),
+            category_limit_4:$('#category_limit_4').val(),
+
+            credit_limit:$('#credit_limit').val(),
+            current_weight:$('#current_weight').val(),
+            max_weight:$('#max_weight').val(),
+
             {% for skill in skills_count %} 
             
             {% call_method character 'get_skill_name' skills skill %}:$('#{% call_method character 'get_skill_name' skills skill %}').val() * 5,
@@ -1089,12 +2678,12 @@ function updateCharacter()
     });
 }
 
+</script>
+
 {% else %}
 
 You dont have permission to visualize this character
 
 {% endif %}
-
-</script>
 
 {% endblock content %}
